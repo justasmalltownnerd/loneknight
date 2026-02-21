@@ -24,10 +24,17 @@ function love.load()
 	player.x = love.graphics.getWidth() / 2   -- This sets the player at the middle of the screen based on the width of the game window. 
 	player.y = love.graphics.getHeight() / 2 - player.img:getHeight() * player_scale -- This sets the player at the middle of the screen based on the height of the game window. 
 
+    player.speed = 200    -- This is the player's speed. This value can be change based on your liking.
+
+
 end
 
 function love.update(dt)
-
+	if love.keyboard.isDown('d') then                    -- When the player presses and holds down the "D" button:
+		player.x = player.x + (player.speed * dt)    -- The player moves to the right.
+	elseif love.keyboard.isDown('a') then                -- When the player presses and holds down the "A" button:
+		player.x = player.x - (player.speed * dt)    -- The player moves to the left.
+	end
 end
 
 -- Draw a coloured rectangle.

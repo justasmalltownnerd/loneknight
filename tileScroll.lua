@@ -1,14 +1,16 @@
 -- load tiles: goes in love.load()
-function tileLoad()
-	-- REPLACE WITH ACTUAL GAME TILES
+
+-- loads tiles with title name[0-num] (ex. tree 0, tree 1, tree 2)
+-- and tile WIDth and LENgth
+-- tile map too
+function tileLoad(name, num, wid, len, map)
 	tile = {}
-	for i=0,3 do -- change 3 to the number of tile images minus 1.
-		tile[i] = love.graphics.newImage( "tile"..i..".png" )
+	for i=0,num do -- change 3 to the number of tile images minus 1.
+		tile[i] = love.graphics.newImage( name ..i..".png" )
 	end
 	
-	-- test map-- redo with actual values
-	map={ 0, 1, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1, 2, 0, 3, 0, 0, 0, 2, 3, 0, 1}
-		
+	-- can grab any map
+		map = map
 	-- map variables
 	map_w = #map -- Obtains the width of the map (# GETS THE LENGTH OF AN ELEMENT)
 	map_x = 0
@@ -17,12 +19,13 @@ function tileLoad()
                                -- Otherwise, the tiles will just pop into view, and we don't want that.
 	map_display_w = 20
 	map_display_h = 15
-	tile_w = 150
-	tile_h = 100
+	tile_w = wid
+	tile_h = len
 end
 	
 -- draw map: goes in love.draw()
-function draw_map()
+-- requires map
+function draw_map(map)
 	offset_x = map_x % tile_w
 	offset_y = map_y % tile_h
 	firstTile_x = math.floor(map_x / tile_w)

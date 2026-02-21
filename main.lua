@@ -1,8 +1,18 @@
 -- main.lua
 require("animation")
+local player = require("player")
+local enemy = require("enemy")
 
 platform = {}
-player = {}
+
+-- THE COLLISION FUNCTION
+-- Checks if Rectangle 1 overlaps with Rectangle 2
+function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+    return x1 < x2 + w2 and
+           x2 < x1 + w1 and
+           y1 < y2 + h2 and
+           y2 < y1 + h1
+end
 
 function love.load()
     -- Platform Setup
@@ -12,85 +22,40 @@ function love.load()
     platform.x = 0
     platform.y = platform.height / 2
 
-    -- Player Setup
-    player_scale = 0.15 
-    player.speed = 200
-    player.isMoving = false 
-    player.facing = 1 -- NEW: 1 means facing right, -1 means facing left
-
-    -- Initialize the animation
-    player.animation = newAnimationFromFiles('PlayerFrame', 6, 0.5) 
-
-    player.x = love.graphics.getWidth() / 2
-    player.y = (love.graphics.getHeight() / 2) - (player.animation.frames[1]:getHeight() * player_scale)
+    player.load()
+    enemy.load()
 end
 
 function love.update(dt)
-    player.isMoving = false
+    player.update(dt)
+    
+    -- Pass the player's height to the enemy so it can calculate the center
+    enemy.update(dt, player.x, player.y, player.height)
 
-    -- Player Movement
-    if love.keyboard.isDown('d') or love.keyboard.isDown('right') then
-        -- FIXED: We now get the width from the first animation frame and multiply by your scale!
-        if player.x < (love.graphics.getWidth() - (player.animation.frames[1]:getWidth() * player_scale)) then
-            player.x = player.x + (player.speed * dt)
-        end
-        player.isMoving = true
-        player.facing = 1 
-    elseif love.keyboard.isDown('a') or love.keyboard.isDown('left') then
-        -- Left wall boundary check
-        if player.x > 0 then 
-            player.x = player.x - (player.speed * dt)
-        end
-        player.isMoving = true
-        player.facing = -1 
-    end
+    -- NEW: The Collision Check!
+    local isColliding = checkCollision(
+        player.x, player.y, player.width, player.height, 
+        enemy.x, enemy.y, enemy.size, enemy.size
+    )
 
-    if player.isMoving then
-        player.animation.currentTime = player.animation.currentTime + dt
-        if player.animation.currentTime >= player.animation.duration then
-            player.animation.currentTime = player.animation.currentTime - player.animation.duration
-        end
+    if isColliding then
+        -- If they touch, turn the enemy yellow
+        enemy.color = {1, 1, 0, 1}
     else
-        player.animation.currentTime = 0
+        -- If they aren't touching, stay red
+        enemy.color = {1, 0, 0, 1}
     end
 end
 
 function love.draw()
-    -- Draw Rectangles
+    -- Draw Environment
     love.graphics.setColor(1, 0, 0, 1)
     love.graphics.rectangle("fill", x, y, w, h)
 
     love.graphics.setColor(0, 0, 1, 1)
     love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
 
-    -- Draw the Character
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    local frameToDraw
-    if player.isMoving then
-        local walkFrameIndex = math.floor(player.animation.currentTime / player.animation.duration * 5)
-        frameToDraw = player.animation.frames[walkFrameIndex + 2] 
-    else
-        frameToDraw = player.animation.frames[1] 
-    end
-
-    -- NEW: Calculate the width and height of the current frame
-    local frameWidth = frameToDraw:getWidth()
-    local frameHeight = frameToDraw:getHeight()
-    
-    -- NEW: Shift the drawing point to the center of the sprite so they don't teleport when turning
-    local drawX = player.x + (frameWidth / 2 * player_scale)
-    local drawY = player.y + (frameHeight / 2 * player_scale)
-
-    -- The love.graphics.draw arguments are: drawable, x, y, rotation, scaleX, scaleY, originX, originY
-    love.graphics.draw(
-        frameToDraw, 
-        drawX, 
-        drawY, 
-        0, 
-        player_scale * player.facing, -- Multiplying scale by our facing direction flips it horizontally!
-        player_scale, 
-        frameWidth / 2, -- Set the X anchor to the middle of the frame
-        frameHeight / 2 -- Set the Y anchor to the middle of the frame
-    )
+    -- Draw Entities
+    enemy.draw()
+    player.draw()
 end

@@ -4,26 +4,25 @@ local EnemyFactory = {}
 -- 1. The Enemy Types Dictionary
 local enemyTypes = {
     ["scout"] = {
-        spritePrefix = 'Boo', -- Looks for EnemyFrame1.png, etc.
-        frames = 6,
+        spritePrefix = 'Sprites/Boo/Boo',        frames = 1,
         animSpeed = 1.0,
-        scale = 0.10,
+        scale = 0.08,
         acceleration = 600,
-        friction = 400,
+        friction = 100,
         max_speed = 180,
-        aggro_range = 350,
-        hoverOffset = 150
+        aggro_range = 650,
+        hoverOffset = 300
     },
     ["brute"] = {
-        spritePrefix = 'Boo', -- You can change this to 'BruteFrame' when you have art!
-        frames = 6,
+        spritePrefix = 'Sprites/Boo/Boo', -- You can change this to 'BruteFrame' when you have art!
+        frames = 1,
         animSpeed = 1.5,    -- Slower animation
-        scale = 0.2,       -- Twice as big!
+        scale = 0.16,       -- Twice as big!
         acceleration = 300, -- Sluggish to start
-        friction = 200,     -- Slides further like on ice
+        friction = 150,     -- Slides further like on ice
         max_speed = 80,     -- Slow top speed
-        aggro_range = 250,  -- Player has to get closer
-        hoverOffset = 80    -- Hovers lower to the ground
+        aggro_range = 450,  -- Player has to get closer
+        hoverOffset = 400    -- Hovers lower to the ground
     }
 }
 
@@ -60,7 +59,7 @@ function EnemyFactory.new(type_name, start_x)
     e.facing = 1
     e.color = {1, 1, 1, 1} -- White by default (shows original image colors)
 
-    -- 3. The Update Method
+-- 3. The Update Method
     function e:update(dt, player_x, player_y, player_height)
         self.timer = self.timer + dt
         
@@ -74,23 +73,24 @@ function EnemyFactory.new(type_name, start_x)
         local dx = player_x - self.x
         local dy = player_y - self.base_y 
         local distance = math.sqrt((dx * dx) + (dy * dy))
+        
+        -- NEW: We set a target_y variable to track exactly where the enemy wants to go
+        local target_y = self.hover_y
 
         if distance < self.aggro_range then
+            -- Keep the X-axis sliding physics!
             if self.x < player_x then
                 self.x_vel = self.x_vel + (self.acceleration * dt)
-                self.facing = -1 -- Adjust to 1 or -1 depending on which way your raw sprite faces
+                self.facing = -1 
             elseif self.x > player_x then
                 self.x_vel = self.x_vel - (self.acceleration * dt)
                 self.facing = 1
             end
 
-            local target_y = player_y + (player_height / 2) - (self.height / 2)
-            if self.base_y < target_y then 
-                self.y_vel = self.y_vel + (self.acceleration * dt)
-            elseif self.base_y > target_y then 
-                self.y_vel = self.y_vel - (self.acceleration * dt)
-            end
+            -- Update the target_y to dive bomb the player
+            target_y = player_y + (player_height / 2) - (self.height / 2)
         else
+            -- Keep the X-axis friction!
             if self.x_vel > 0 then
                 self.x_vel = self.x_vel - (self.friction * dt)
                 if self.x_vel < 0 then self.x_vel = 0 end
@@ -98,21 +98,23 @@ function EnemyFactory.new(type_name, start_x)
                 self.x_vel = self.x_vel + (self.friction * dt)
                 if self.x_vel > 0 then self.x_vel = 0 end
             end
-
-            if self.base_y < self.hover_y then
-                self.y_vel = self.y_vel + (self.acceleration * dt)
-            elseif self.base_y > self.hover_y then
-                self.y_vel = self.y_vel - (self.acceleration * dt)
-            end
+            
+            -- If out of range, the target_y stays as self.hover_y
         end
         
+        -- Clamp only the X velocity now
         if self.x_vel > self.max_speed then self.x_vel = self.max_speed end
         if self.x_vel < -self.max_speed then self.x_vel = -self.max_speed end
-        if self.y_vel > self.max_speed then self.y_vel = self.max_speed end
-        if self.y_vel < -self.max_speed then self.y_vel = -self.max_speed end
 
+        -- Apply X velocity
         self.x = self.x + (self.x_vel * dt)
-        self.base_y = self.base_y + (self.y_vel * dt)
+        
+        -- NEW: THE LERP! 
+        -- This smoothly slides the base_y 5% of the way to the target_y every frame.
+        -- Change the '5' to a higher number to make them swoop faster!
+        self.base_y = self.base_y + ((target_y - self.base_y) * 2 * dt)
+        
+        -- Apply the sine wave wobble to the visual position
         self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
     end
 

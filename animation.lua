@@ -1,12 +1,13 @@
 -- animation.lua
 
-function newAnimationFromFiles(fileNamePrefix, totalFrames, duration)
+function newAnimationFromFiles(filePathPrefix, totalFrames, duration)
     local animation = {}
     animation.frames = {}
     
-    -- Loop through 1 to totalFrames and load each individual image
     for i = 1, totalFrames do
-        local imagePath = 'Sprites/' .. fileNamePrefix .. i .. '.png'
+        -- Now it just glues your custom path, the number, and '.png' together!
+        -- Example: "Sprites/PlayerWalk/PlayerFrame" + "1" + ".png"
+        local imagePath = filePathPrefix .. i .. '.png'
         table.insert(animation.frames, love.graphics.newImage(imagePath))
     end
     

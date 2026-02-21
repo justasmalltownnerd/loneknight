@@ -12,8 +12,8 @@ function player.load()
     player.isMoving = false 
     player.facing = 1 
 
-    player.animation = newAnimationFromFiles('PlayerFrame', 6, 0.5) 
-    
+    player.animation = newAnimationFromFiles('Sprites/PlayerWalk/PlayerFrame', 6, 0.5)    
+
     -- Set up animation durations to match the speeds
     -- (Lower duration = faster animation)
     player.walk_anim_duration = 0.75
@@ -22,7 +22,7 @@ function player.load()
     player.width = player.animation.frames[1]:getWidth() * player.scale
     player.height = player.animation.frames[1]:getHeight() * player.scale
 
-    player.x = love.graphics.getWidth() / 2
+    player.x = 100
     player.y = SPAWN_HEIGHT - player.height
 
     player.ground = player.y     
@@ -75,11 +75,11 @@ function player.update(dt)
 
     -- 4. Apply Movement
     if move_dir == 1 then
-        if player.x < (love.graphics.getWidth() - player.width) then
+        if player.x < (WORLD_WIDTH - player.width) then
             player.x = player.x + (player.speed * dt)
         end
         player.isMoving = true
-        player.facing = 1 
+        player.facing = 1
     elseif move_dir == -1 then
         if player.x > 0 then 
             player.x = player.x - (player.speed * dt)

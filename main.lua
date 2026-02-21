@@ -6,10 +6,10 @@ local gamedata = require("gamedata")
 local ui = require("ui")             
 
 -- ==========================================
--- GAME CONFIG
+-- GAME CONFIG & VARIABLES
 -- ==========================================
-DEBUG_DAMAGE_NUMBERS = true -- Shows damage numbers
-floating_texts = {}         -- List to hold damage numbers
+DEBUG_DAMAGE_NUMBERS = false 
+floating_texts = {}         
 
 gameState = "menu" 
 current_level = 1
@@ -17,8 +17,12 @@ local level_data = gamedata.levels
 
 platform = {}
 active_enemies = {}
-WORLD_WIDTH = 3000
+WORLD_WIDTH = 4000 -- Expanded world for level transitions!
 camera_x = 0
+
+-- Transition Variables
+transitionState = "" 
+fade_alpha = 0
 
 sign = {
     x = 800, width = 60, height = 80,
@@ -26,6 +30,9 @@ sign = {
     isReading = false, showPrompt = false
 }
 
+-- ==========================================
+-- HELPER FUNCTIONS
+-- ==========================================
 function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
 end
@@ -37,13 +44,15 @@ function loadLevel(level_id)
     platform.width = WORLD_WIDTH
     platform.height = love.graphics.getHeight()
     platform.x = 0
-    platform.y = platform.height / 1.25 
+    platform.y = platform.height / 1.45 
     SPAWN_HEIGHT = platform.y
 
     sign.y = SPAWN_HEIGHT - sign.height
     sign.isReading = false
     sign.showPrompt = false
     floating_texts = {}
+    transitionState = ""
+    fade_alpha = 0
 
     player.load()
 
@@ -55,21 +64,21 @@ function loadLevel(level_id)
     gameState = "playing"
 end
 
+-- ==========================================
+-- LÖVE FRAMEWORK FUNCTIONS
+-- ==========================================
 function love.load()
     titleFont = love.graphics.newFont("Fonts/Branda-yolq.ttf", 64)
     regularFont = love.graphics.newFont("Fonts/QueensidesMedium.ttf", 20)
     love.graphics.setFont(regularFont)
     love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
     
-    -- The Vignette Shader! 
-    -- It draws a black ring that fades smoothly into the center.
     vignetteShader = love.graphics.newShader[[
         extern number intensity;
         vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
             vec2 center = vec2(0.5, 0.5);
             vec2 uv = screen_coords.xy / love_ScreenSize.xy;
             float dist = distance(uv, center);
-            // 0.4 starts the darkness halfway out, 1.0 reaches pure black at corners
             float alpha = smoothstep(0.4, 1.0, dist) * intensity;
             return vec4(0.0, 0.0, 0.0, alpha);
         }
@@ -105,29 +114,26 @@ function love.mousepressed(x, y, button, istouch, presses)
             if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
         end
 
-        -- NEW: Attack Input (Left Click)
-        if gameState == "playing" and not player.isAttacking and not player.isBlocking then
+        -- Player Attack Input (Left Click)
+        if gameState == "playing" and not player.isAttacking and not player.isBlocking and transitionState == "" then
             player.isAttacking = true
             player.anim_attack.currentTime = 0
             
-            -- Create an invisible Hitbox in front of the player
             local attack_reach = 60 
             local hitbox_x = player.x
             if player.facing == 1 then
-                hitbox_x = player.x + player.width -- Project to the right
+                hitbox_x = player.x + player.width 
             else
-                hitbox_x = player.x - attack_reach -- Project to the left
+                hitbox_x = player.x - attack_reach 
             end
             
-            -- Check if any enemies are caught in the swing
             for _, enemy in ipairs(active_enemies) do
                 if checkCollision(hitbox_x, player.y, attack_reach, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
-                    -- Boom! Enemy hit!
                     local attack_damage = 40
                     enemy.hp = enemy.hp - attack_damage
                     
-                    enemy.flash_timer = 0.15   -- Make them glow
-                    enemy.speed_mod = 0.1      -- Slow them down heavily
+                    enemy.flash_timer = 0.15   
+                    enemy.speed_mod = 0.1      
                     enemy.slow_timer = 0.5
                     
                     if DEBUG_DAMAGE_NUMBERS then
@@ -148,6 +154,38 @@ function love.update(dt)
     if gameState == "playing" then
         if sign.isReading then return end 
 
+        -- ==========================================
+        -- LEVEL TRANSITION LOGIC
+        -- ==========================================
+        if transitionState == "out" then
+            fade_alpha = fade_alpha + (dt * 1.5) 
+            if fade_alpha >= 1 then
+                fade_alpha = 1
+                if level_data[current_level + 1] then
+                    loadLevel(current_level + 1)
+                    transitionState = "in" 
+                else
+                    gameState = "menu"
+                    transitionState = ""
+                    fade_alpha = 0
+                end
+            end
+            return -- Pause all player/enemy updates while fading out!
+            
+        elseif transitionState == "in" then
+            fade_alpha = fade_alpha - (dt * 1.5)
+            if fade_alpha <= 0 then
+                fade_alpha = 0
+                transitionState = "" 
+            end
+        end
+
+        -- Check if player crossed the finish line!
+        if transitionState == "" and player.x >= level_data[current_level].end_x then
+            transitionState = "out"
+        end
+        -- ==========================================
+
         player.update(dt)
         
         camera_x = player.x - (love.graphics.getWidth() / 2) + (player.width / 2)
@@ -164,7 +202,6 @@ function love.update(dt)
             sign.isReading = false 
         end
 
-        -- Update floating damage numbers
         for i = #floating_texts, 1, -1 do
             local txt = floating_texts[i]
             txt.y = txt.y - (30 * dt)
@@ -177,29 +214,21 @@ function love.update(dt)
         for index, enemy in ipairs(active_enemies) do
             enemy:update(dt, player.x, player.y, player.height)
             
-            -- ==========================================
-            -- FIXED: PROJECT THE ENEMY HITBOX
-            -- ==========================================
+            -- Enemy Hitbox Projection
             local e_hitbox_x = enemy.x
-            -- Based on your code, facing == 1 means the enemy is facing LEFT
             if enemy.facing == 1 then
                 e_hitbox_x = enemy.x - enemy.attack_range
             end
-            -- The danger zone is their body width PLUS their reach
             local e_hitbox_w = enemy.width + enemy.attack_range
 
-            -- The Collision and Damage Event
-            -- Notice we use e_hitbox_x and e_hitbox_w here instead of enemy.x and enemy.width!
             if enemy.isAttacking and checkCollision(player.x, player.y, player.width, player.height, e_hitbox_x, enemy.y, e_hitbox_w, enemy.height) then
                 if player.invincibility <= 0 then
-                    -- Base damage and slow duration
                     local damage = 25
                     local incoming_slow = 0.3
                     
-                    -- Block Damage Reduction!
                     if player.isBlocking then
                         damage = damage * 0.5      
-                        incoming_slow = 0.1        
+                        incoming_slow = 0.1
                     end
                     
                     player.hp = player.hp - damage
@@ -264,7 +293,6 @@ function love.draw()
         love.graphics.push() 
         love.graphics.translate(-math.floor(camera_x), 0) 
 
-        -- Draw Environment
         local currentColor = level_data[current_level].floor_color
         love.graphics.setColor(currentColor)
         love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
@@ -272,36 +300,28 @@ function love.draw()
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
 
-        -- Draw Entities
         for index, enemy in ipairs(active_enemies) do
             enemy:draw()
         end
         
         player.draw()
 
-        -- ==========================================
-        -- IN-GAME WORLD UI (Always drawn last so it stays on top!)
-        -- ==========================================
-        
-        -- Draw floating damage numbers
+        -- In-Game World UI
         love.graphics.setFont(regularFont)
         for _, txt in ipairs(floating_texts) do
-            -- Fade text out as the timer goes down
             love.graphics.setColor(1, 0, 0, txt.timer) 
             love.graphics.print(txt.text, txt.x, txt.y)
         end
 
-        -- Draw interaction prompts
         if sign.showPrompt and not sign.isReading then
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.setFont(regularFont)
-            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 100)
+            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 30)
         end
 
         love.graphics.pop() 
         
-        -- 2. SCREEN UI SPACE (Vignette, Menus, Text Boxes)
-        
+        -- 2. SCREEN UI SPACE
         local missing_health_percent = 1.0 - (player.hp / player.max_hp)
         if missing_health_percent > 0 then
             love.graphics.setShader(vignetteShader)
@@ -327,6 +347,12 @@ function love.draw()
             love.graphics.rectangle("line", margin, margin, box_w, box_h, 10, 10)
 
             love.graphics.printf(sign.text, margin + 30, margin + 30, box_w - 60, "left")
+        end
+        
+        -- Transition Overlay (Always drawn last!)
+        if fade_alpha > 0 then
+            love.graphics.setColor(0, 0, 0, fade_alpha)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         end
     end
 end

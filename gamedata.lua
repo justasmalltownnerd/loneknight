@@ -1,18 +1,18 @@
 -- gamedata.lua
 local data = {}
 
--- Store all your level configurations here!
 data.levels = {
     [1] = {
-        floor_color = {0, 0, 1, 1}, -- Blue
+        floor_color = {0, 0, 1, 1}, 
+        end_x = 2800, -- The player triggers the end at 2800 pixels!
         enemies = {
-            {type = "Forest Sprite", x = 2600},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2200}
         }
     },
     [2] = {
-        floor_color = {0, 0.5, 0, 1}, -- Green
+        floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},

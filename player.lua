@@ -2,7 +2,7 @@
 local player = {}
 
 function player.load()
-    player.scale = 0.30 
+    player.scale = 0.50 
     
     player.walk_speed = 200
     player.sprint_speed = 350
@@ -13,7 +13,7 @@ function player.load()
     -- Load all your different animations!
     player.anim_idle = newAnimationFromFiles('Sprites/Player/PlayerIdle/PlayerWalk', 1, 0.6)
     player.anim_walk = newAnimationFromFiles('Sprites/Player/PlayerWalk/PlayerWalk', 6, 0.5) 
-    player.anim_attack = newAnimationFromFiles('Sprites/Player/PlayerAttack/goku', 1, 0.3) 
+    player.anim_attack = newAnimationFromFiles('Sprites/Player/PlayerAttack/PlayerAttack', 7, 0.3) 
     player.anim_block = newAnimationFromFiles('Sprites/Player/PlayerBlock/PlayerBlock', 2, 0.2) 
     
     -- Set the active animation to idle by default
@@ -102,12 +102,10 @@ function player.update(dt)
 
     player.isMoving = (move_dir ~= 0)
 
-    -- NEW: Adjust speed if attacking (stop moving) or blocking (move at half speed)
+    -- Adjust speed if attacking or blocking (stop moving entirely)
     local current_speed = player.speed * player.speed_mod
-    if player.isAttacking then 
+    if player.isAttacking or player.isBlocking then 
         current_speed = 0 
-    elseif player.isBlocking then 
-        current_speed = current_speed * 0.5 
     end
 
     if move_dir == 1 then

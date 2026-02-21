@@ -162,9 +162,12 @@ function EnemyFactory.new(type_name, start_x)
     end
 
     function e:draw()
+        -- Use a red tint instead of "10" since LÖVE caps colors at 1.0!
         if self.flash_timer > 0 then
-            love.graphics.setColor(10, 10, 10, 1) 
+            -- Tint them red and slightly transparent, exactly like the player!
+            love.graphics.setColor(1, 0.9, 0.7, 0.8) 
         else
+            -- Reset to normal color when the flash timer ends
             love.graphics.setColor(self.color)
         end
         

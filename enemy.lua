@@ -1,66 +1,145 @@
 -- enemy.lua
-local enemy = {}
+local EnemyFactory = {}
 
-function enemy.load()
-    enemy.size = 40
-    enemy.hover_y = (love.graphics.getHeight() / 2) - 150 
-    
-    enemy.x = 600 
-    
-    -- NEW: Separate the logical position from the visual position
-    enemy.base_y = enemy.hover_y 
-    enemy.y = enemy.base_y 
-    
-    enemy.speed = 100
-    enemy.aggro_range = 300 
-    enemy.color = {1, 0, 0, 1} 
-    
-    -- NEW: Wobble animation variables
-    enemy.timer = 0
-    enemy.wobble_speed = 5       -- How fast it bobs up and down
-    enemy.wobble_amplitude = 15  -- How high and low it travels (in pixels)
-end
+-- 1. The Enemy Types Dictionary
+local enemyTypes = {
+    ["scout"] = {
+        spritePrefix = 'Boo', -- Looks for EnemyFrame1.png, etc.
+        frames = 6,
+        animSpeed = 1.0,
+        scale = 0.10,
+        acceleration = 600,
+        friction = 400,
+        max_speed = 180,
+        aggro_range = 350,
+        hoverOffset = 150
+    },
+    ["brute"] = {
+        spritePrefix = 'Boo', -- You can change this to 'BruteFrame' when you have art!
+        frames = 6,
+        animSpeed = 1.5,    -- Slower animation
+        scale = 0.2,       -- Twice as big!
+        acceleration = 300, -- Sluggish to start
+        friction = 200,     -- Slides further like on ice
+        max_speed = 80,     -- Slow top speed
+        aggro_range = 250,  -- Player has to get closer
+        hoverOffset = 80    -- Hovers lower to the ground
+    }
+}
 
-function enemy.update(dt, player_x, player_y, player_height)
-    -- Tick the timer forward for the sine wave
-    enemy.timer = enemy.timer + dt
+-- 2. The Spawn Function
+function EnemyFactory.new(type_name, start_x)
+    local e = {}
+    local template = enemyTypes[type_name]
+    
+    if not template then template = enemyTypes["scout"] end 
 
-    -- AI Logic: Use base_y for the distance math so the wobble doesn't confuse the AI!
-    local dx = player_x - enemy.x
-    local dy = player_y - enemy.base_y 
-    local distance = math.sqrt((dx * dx) + (dy * dy))
+    -- Copy all the stats from the template into this specific enemy
+    e.acceleration = template.acceleration
+    e.friction = template.friction
+    e.max_speed = template.max_speed
+    e.aggro_range = template.aggro_range
+    e.scale = template.scale
+    
+    e.hover_y = SPAWN_HEIGHT - template.hoverOffset
+    e.x = start_x
+    e.base_y = e.hover_y
+    e.y = e.base_y
+    e.x_vel = 0
+    e.y_vel = 0
+    
+    e.timer = 0
+    e.wobble_speed = 5       
+    e.wobble_amplitude = 15  
+    
+    -- Initialize Animation
+    e.animation = newAnimationFromFiles(template.spritePrefix, template.frames, template.animSpeed)
+    e.width = e.animation.frames[1]:getWidth() * e.scale
+    e.height = e.animation.frames[1]:getHeight() * e.scale
+    
+    e.facing = 1
+    e.color = {1, 1, 1, 1} -- White by default (shows original image colors)
 
-    if distance < enemy.aggro_range then
-        -- Move X
-        if enemy.x < player_x then
-            enemy.x = enemy.x + (enemy.speed * dt)
-        elseif enemy.x > player_x then
-            enemy.x = enemy.x - (enemy.speed * dt)
+    -- 3. The Update Method
+    function e:update(dt, player_x, player_y, player_height)
+        self.timer = self.timer + dt
+        
+        -- Update Animation
+        self.animation.currentTime = self.animation.currentTime + dt
+        while self.animation.currentTime >= self.animation.duration do
+            self.animation.currentTime = self.animation.currentTime - self.animation.duration
         end
 
-        -- Move Y (Adjusting base_y instead of y)
-        local target_y = player_y + (player_height / 2) - (enemy.size / 2)
-        if enemy.base_y < target_y then 
-            enemy.base_y = enemy.base_y + (enemy.speed * dt)
-        elseif enemy.base_y > target_y then 
-            enemy.base_y = enemy.base_y - (enemy.speed * dt)
+        -- AI Logic
+        local dx = player_x - self.x
+        local dy = player_y - self.base_y 
+        local distance = math.sqrt((dx * dx) + (dy * dy))
+
+        if distance < self.aggro_range then
+            if self.x < player_x then
+                self.x_vel = self.x_vel + (self.acceleration * dt)
+                self.facing = -1 -- Adjust to 1 or -1 depending on which way your raw sprite faces
+            elseif self.x > player_x then
+                self.x_vel = self.x_vel - (self.acceleration * dt)
+                self.facing = 1
+            end
+
+            local target_y = player_y + (player_height / 2) - (self.height / 2)
+            if self.base_y < target_y then 
+                self.y_vel = self.y_vel + (self.acceleration * dt)
+            elseif self.base_y > target_y then 
+                self.y_vel = self.y_vel - (self.acceleration * dt)
+            end
+        else
+            if self.x_vel > 0 then
+                self.x_vel = self.x_vel - (self.friction * dt)
+                if self.x_vel < 0 then self.x_vel = 0 end
+            elseif self.x_vel < 0 then
+                self.x_vel = self.x_vel + (self.friction * dt)
+                if self.x_vel > 0 then self.x_vel = 0 end
+            end
+
+            if self.base_y < self.hover_y then
+                self.y_vel = self.y_vel + (self.acceleration * dt)
+            elseif self.base_y > self.hover_y then
+                self.y_vel = self.y_vel - (self.acceleration * dt)
+            end
         end
-    else
-        -- Retreat (Adjusting base_y instead of y)
-        if enemy.base_y < enemy.hover_y then
-            enemy.base_y = enemy.base_y + (enemy.speed * dt)
-        elseif enemy.base_y > enemy.hover_y then
-            enemy.base_y = enemy.base_y - (enemy.speed * dt)
-        end
+        
+        if self.x_vel > self.max_speed then self.x_vel = self.max_speed end
+        if self.x_vel < -self.max_speed then self.x_vel = -self.max_speed end
+        if self.y_vel > self.max_speed then self.y_vel = self.max_speed end
+        if self.y_vel < -self.max_speed then self.y_vel = -self.max_speed end
+
+        self.x = self.x + (self.x_vel * dt)
+        self.base_y = self.base_y + (self.y_vel * dt)
+        self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
     end
-    
-    -- Apply the sine wave to the base_y to get the final wobbling position.
-    enemy.y = enemy.base_y + (math.sin(enemy.timer * enemy.wobble_speed) * enemy.wobble_amplitude)
+
+    -- 4. The Draw Method
+    function e:draw()
+        -- Setting the color allows us to "tint" the sprite if they hit the player!
+        love.graphics.setColor(self.color)
+        
+        local frameIndex = math.floor(self.animation.currentTime / self.animation.duration * #self.animation.frames) + 1
+        -- Safeguard just in case the math ever outputs a number slightly too high
+        if frameIndex > #self.animation.frames then frameIndex = #self.animation.frames end
+        local frameToDraw = self.animation.frames[frameIndex]
+
+        local frameWidth = frameToDraw:getWidth()
+        local frameHeight = frameToDraw:getHeight()
+        
+        local drawX = self.x + (frameWidth / 2 * self.scale)
+        local drawY = self.y + (frameHeight / 2 * self.scale)
+
+        love.graphics.draw(
+            frameToDraw, drawX, drawY, 0, 
+            self.scale * self.facing, self.scale, 
+            frameWidth / 2, frameHeight / 2 
+        )
+    end
+
+    return e
 end
 
-function enemy.draw()
-    love.graphics.setColor(enemy.color)
-    love.graphics.rectangle("fill", enemy.x, enemy.y, enemy.size, enemy.size)
-end
-
-return enemy
+return EnemyFactory

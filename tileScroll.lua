@@ -17,7 +17,7 @@ function tileLoad()
                                -- Otherwise, the tiles will just pop into view, and we don't want that.
 	map_display_w = 20
 	map_display_h = 15
-	tile_w = 100
+	tile_w = 150
 	tile_h = 100
 end
 	
@@ -43,8 +43,8 @@ function draw_map()
 end
 
 -- updates the tile position based on keyboard input: goes in love.update()
-function updateTile( dt )
-	local speed = 300 * dt
+function updateTile( dt, int )
+	local speed = int * dt
 	-- get input
 	if love.keyboard.isDown( "a" ) then
 		map_x = map_x - speed

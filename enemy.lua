@@ -51,8 +51,10 @@ function EnemyFactory.new(type_name, start_x)
     e.wobble_speed = 5       
     e.wobble_amplitude = 15  
 
+    e.hp = 100
     e.speed_mod = 1.0
     e.slow_timer = 0
+    e.flash_timer = 0 
     
     e.animation = newAnimationFromFiles(template.spritePrefix, template.frames, template.animSpeed)
     
@@ -68,6 +70,10 @@ function EnemyFactory.new(type_name, start_x)
     function e:update(dt, player_x, player_y, player_height)
         self.timer = self.timer + dt
         
+        if self.flash_timer > 0 then
+            self.flash_timer = self.flash_timer - dt
+        end
+
         -- Update Animation
         self.animation.currentTime = self.animation.currentTime + dt
         while self.animation.currentTime >= self.animation.duration do
@@ -126,6 +132,12 @@ function EnemyFactory.new(type_name, start_x)
 
     -- 4. The Draw Method
     function e:draw()
+        if self.flash_timer > 0 then
+            love.graphics.setColor(10, 10, 10, 1) -- Intense white glow
+        else
+            love.graphics.setColor(self.color)
+        end
+
         -- Setting the color allows us to "tint" the sprite if they hit the player!
         love.graphics.setColor(self.color)
         

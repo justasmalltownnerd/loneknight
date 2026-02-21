@@ -8,10 +8,15 @@ function player.load()
     player.sprint_speed = 350
     player.speed = player.walk_speed 
     
-    player.isMoving = false 
     player.facing = 1 
 
-    player.animation = newAnimationFromFiles('Sprites/PlayerWalk/PlayerFrame', 6, 0.5) 
+    -- NEW: Load all your different animations!
+    player.anim_walk = newAnimationFromFiles('Sprites/PlayerWalk/PlayerFrame', 6, 0.5) 
+    player.anim_attack = newAnimationFromFiles('Sprites/PlayerAttack/goku', 1, 0.3) 
+    player.anim_block = newAnimationFromFiles('Sprites/PlayerBlock/Boo', 1, 0.2) 
+    
+    -- Set the active animation
+    player.animation = player.anim_walk
     
     player.walk_anim_duration = 0.5
     player.sprint_anim_duration = 0.25
@@ -21,7 +26,6 @@ function player.load()
 
     player.x = 100
     player.y = SPAWN_HEIGHT - player.height
-
     player.ground = player.y     
     player.y_velocity = 0        
     player.jump_height = -600    
@@ -37,14 +41,16 @@ function player.load()
     player.invincibility = 0
     player.speed_mod = 1.0  
     player.slow_timer = 0
-    
     player.regen_rate = 5 
-    player.regen_delay_timer = 0
+    player.regen_delay_timer = 0 
+    
+    -- NEW: Combat States
+    player.isMoving = false 
+    player.isAttacking = false
+    player.isBlocking = false
 end
 
 function player.update(dt)
-    player.isMoving = false
-
     -- Tick down general timers
     if player.invincibility > 0 then player.invincibility = player.invincibility - dt end
     if player.slow_timer > 0 then
@@ -53,30 +59,30 @@ function player.update(dt)
         player.speed_mod = 1.0 
     end
 
-    -- NEW: Tick down the regeneration delay timer
     if player.regen_delay_timer > 0 then
         player.regen_delay_timer = player.regen_delay_timer - dt
     end
 
-    -- UPDATED: Only regenerate if the delay timer has hit zero!
     if player.hp < player.max_hp and player.regen_delay_timer <= 0 then
         local old_hp_floor = math.floor(player.hp)
-        
         player.hp = player.hp + (player.regen_rate * dt)
         if player.hp > player.max_hp then player.hp = player.max_hp end
-        
-        local new_hp_floor = math.floor(player.hp)
-        if new_hp_floor > old_hp_floor then
-            print("Regenerating... HP: " .. new_hp_floor .. "/" .. player.max_hp)
+        if math.floor(player.hp) > old_hp_floor then
+            print("Regenerating... HP: " .. math.floor(player.hp) .. "/" .. player.max_hp)
         end
     end
 
+    -- NEW: Check for Block Input (Using 'K' or Right-Click as an example)
+    -- We only allow blocking if they aren't currently swinging their sword!
+    player.isBlocking = (love.keyboard.isDown('k') or love.mouse.isDown(2)) and not player.isAttacking
+
+    -- Movement Input
     if love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift') then
         player.speed = player.sprint_speed
-        player.animation.duration = player.sprint_anim_duration
+        player.anim_walk.duration = player.sprint_anim_duration
     else
         player.speed = player.walk_speed
-        player.animation.duration = player.walk_anim_duration
+        player.anim_walk.duration = player.walk_anim_duration
     end
 
     local right_down = love.keyboard.isDown('d') or love.keyboard.isDown('right')
@@ -93,24 +99,25 @@ function player.update(dt)
     elseif right_down then move_dir = 1
     elseif left_down then move_dir = -1 end
 
-    -- NEW: Multiply movement by the speed_mod so slowdown affects the player!
-    local current_speed = player.speed * player.speed_mod
+    player.isMoving = (move_dir ~= 0)
 
-    if move_dir == 1 then
-        if player.x < (WORLD_WIDTH - player.width) then
-            player.x = player.x + (current_speed * dt)
-        end
-        player.isMoving = true
-        player.facing = 1 
-    elseif move_dir == -1 then
-        if player.x > 0 then 
-            player.x = player.x - (current_speed * dt)
-        end
-        player.isMoving = true
-        player.facing = -1 
+    -- NEW: Adjust speed if attacking (stop moving) or blocking (move at half speed)
+    local current_speed = player.speed * player.speed_mod
+    if player.isAttacking then 
+        current_speed = 0 
+    elseif player.isBlocking then 
+        current_speed = current_speed * 0.5 
     end
 
-    if love.keyboard.isDown('space') and player.can_jump then                     
+    if move_dir == 1 then
+        if player.x < (WORLD_WIDTH - player.width) then player.x = player.x + (current_speed * dt) end
+        if not player.isAttacking then player.facing = 1 end
+    elseif move_dir == -1 then
+        if player.x > 0 then player.x = player.x - (current_speed * dt) end
+        if not player.isAttacking then player.facing = -1 end
+    end
+
+    if love.keyboard.isDown('space') and player.can_jump and not player.isAttacking then                     
         if player.y_velocity == 0 then player.y_velocity = player.jump_height end
     end
 
@@ -121,32 +128,45 @@ function player.update(dt)
         player.y_velocity = 0     
     end
 
-    if player.isMoving then
-        -- Also slow down the animation so the slowdown feels visceral
+    -- NEW: Animation State Machine!
+    if player.isAttacking then
+        player.animation = player.anim_attack
+        player.animation.currentTime = player.animation.currentTime + dt
+        -- When attack finishes, unlock the player state
+        if player.animation.currentTime >= player.animation.duration then
+            player.isAttacking = false
+            player.animation.currentTime = 0
+        end
+    elseif player.isBlocking then
+        player.animation = player.anim_block
+        player.animation.currentTime = player.animation.currentTime + dt
+        -- Freeze on the final frame of the block animation
+        if player.animation.currentTime >= player.animation.duration then
+            player.animation.currentTime = player.animation.duration - 0.001
+        end
+    elseif player.isMoving then
+        player.animation = player.anim_walk
         player.animation.currentTime = player.animation.currentTime + (dt * player.speed_mod)
         while player.animation.currentTime >= player.animation.duration do
             player.animation.currentTime = player.animation.currentTime - player.animation.duration
         end
     else
+        player.animation = player.anim_walk
         player.animation.currentTime = 0
     end
 end
 
 function player.draw()
-    -- If invincible, flash the player by changing alpha
     if player.invincibility > 0 and math.floor(player.invincibility * 10) % 2 == 0 then
-        love.graphics.setColor(1, 0, 0, 0.5) -- Flash transparent red
+        love.graphics.setColor(1, 0, 0, 0.5) 
     else
         love.graphics.setColor(1, 1, 1, 1)
     end
     
-    local frameToDraw
-    if player.isMoving then
-        local walkFrameIndex = math.floor(player.animation.currentTime / player.animation.duration * 5)
-        frameToDraw = player.animation.frames[walkFrameIndex + 2] 
-    else
-        frameToDraw = player.animation.frames[1] 
-    end
+    -- Determine which frame to draw based on current animation
+    local frameIndex = math.floor(player.animation.currentTime / player.animation.duration * #player.animation.frames) + 1
+    if frameIndex > #player.animation.frames then frameIndex = #player.animation.frames end
+    local frameToDraw = player.animation.frames[frameIndex]
 
     local frameWidth = frameToDraw:getWidth()
     local frameHeight = frameToDraw:getHeight()

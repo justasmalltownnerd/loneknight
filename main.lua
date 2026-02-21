@@ -37,13 +37,13 @@ function loadLevel(level_id)
     platform.width = WORLD_WIDTH
     platform.height = love.graphics.getHeight()
     platform.x = 0
-    platform.y = platform.height / 1.5 
+    platform.y = platform.height / 1.25 
     SPAWN_HEIGHT = platform.y
 
     sign.y = SPAWN_HEIGHT - sign.height
     sign.isReading = false
     sign.showPrompt = false
-    floating_texts = {} -- Clear damage numbers on reset
+    floating_texts = {}
 
     player.load()
 
@@ -104,6 +104,43 @@ function love.mousepressed(x, y, button, istouch, presses)
         elseif gameState == "settings" then
             if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
         end
+
+        -- NEW: Attack Input (Left Click)
+        if gameState == "playing" and not player.isAttacking and not player.isBlocking then
+            player.isAttacking = true
+            player.anim_attack.currentTime = 0
+            
+            -- Create an invisible Hitbox in front of the player
+            local attack_reach = 60 
+            local hitbox_x = player.x
+            if player.facing == 1 then
+                hitbox_x = player.x + player.width -- Project to the right
+            else
+                hitbox_x = player.x - attack_reach -- Project to the left
+            end
+            
+            -- Check if any enemies are caught in the swing
+            for _, enemy in ipairs(active_enemies) do
+                if checkCollision(hitbox_x, player.y, attack_reach, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
+                    -- Boom! Enemy hit!
+                    local attack_damage = 40
+                    enemy.hp = enemy.hp - attack_damage
+                    
+                    enemy.flash_timer = 0.15   -- Make them glow
+                    enemy.speed_mod = 0.1      -- Slow them down heavily
+                    enemy.slow_timer = 0.5
+                    
+                    if DEBUG_DAMAGE_NUMBERS then
+                        table.insert(floating_texts, {
+                            text = attack_damage,
+                            x = enemy.x + (enemy.width/2),
+                            y = enemy.y - 20,
+                            timer = 1.0
+                        })
+                    end
+                end
+            end
+        end
     end
 end
 
@@ -127,10 +164,10 @@ function love.update(dt)
             sign.isReading = false 
         end
 
-        -- NEW: Update floating damage numbers
+        -- Update floating damage numbers
         for i = #floating_texts, 1, -1 do
             local txt = floating_texts[i]
-            txt.y = txt.y - (30 * dt) -- Float upwards
+            txt.y = txt.y - (30 * dt)
             txt.timer = txt.timer - dt
             if txt.timer <= 0 then
                 table.remove(floating_texts, i)
@@ -143,34 +180,42 @@ function love.update(dt)
             -- The Collision and Damage Event
             if checkCollision(player.x, player.y, player.width, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
                 if player.invincibility <= 0 then
-                    -- 1. Deal Damage & Give Invincibility
+                    -- Base damage and slow duration
                     local damage = 25
+                    local incoming_slow = 0.3
+                    
+                    -- NEW: Block Damage Reduction!
+                    if player.isBlocking then
+                        damage = damage * 0.5      -- 50% damage reduction
+                        incoming_slow = 0.1        -- Less slowdown penalty
+                    end
+                    
                     player.hp = player.hp - damage
                     if player.hp < 0 then player.hp = 0 end 
-                    player.invincibility = 1.5
-                    
-                    -- Reset the regen cooldown to 2 seconds!
+                    player.invincibility = 1.0
                     player.regen_delay_timer = 2.0 
                     
-                    print("DAMAGE TAKEN! Current HP: " .. math.floor(player.hp) .. "/" .. player.max_hp)
-                    
-                    -- 2. Trigger Slowdowns
                     player.speed_mod = 0.8
-                    player.slow_timer = 0.3
+                    player.slow_timer = incoming_slow
                     
                     enemy.speed_mod = 0.2
                     enemy.slow_timer = 0.6
                     
-                    -- 3. Spawn Floating Text
                     if DEBUG_DAMAGE_NUMBERS then
                         table.insert(floating_texts, {
                             text = "-" .. damage,
-                            x = enemy.x + (enemy.width/2),
-                            y = enemy.y - 20,
+                            x = player.x + (player.width/2), -- Spawn it over the player!
+                            y = player.y - 20,
                             timer = 1.0
                         })
                     end
                 end
+            end
+        end
+
+        for i = #active_enemies, 1, -1 do
+            if active_enemies[i].hp <= 0 then
+                table.remove(active_enemies, i)
             end
         end
     end

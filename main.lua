@@ -2,16 +2,17 @@
 require("animation")
 local player = require("player")
 local EnemyFactory = require("enemy")
-local gamedata = require("gamedata") -- NEW: Pull in our data locker
-local ui = require("ui")             -- NEW: Pull in our UI tools
+local gamedata = require("gamedata") 
+local ui = require("ui")             
 
 -- ==========================================
--- GAME STATE & LEVEL DATA
+-- GAME CONFIG
 -- ==========================================
+DEBUG_DAMAGE_NUMBERS = true -- Shows damage numbers
+floating_texts = {}         -- List to hold damage numbers
+
 gameState = "menu" 
 current_level = 1
-
--- Tell the game to grab the levels from our new file!
 local level_data = gamedata.levels
 
 platform = {}
@@ -20,17 +21,14 @@ WORLD_WIDTH = 3000
 camera_x = 0
 
 sign = {
-    x = 800,
-    width = 60,
-    height = 80,
-    text = gamedata.signText, -- Tell the sign to grab the text from our new file!
-    isReading = false,
-    showPrompt = false
+    x = 800, width = 60, height = 80,
+    text = gamedata.signText, 
+    isReading = false, showPrompt = false
 }
 
--- ==========================================
--- CORE FUNCTIONS
--- ==========================================
+function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+    return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
+end
 
 function loadLevel(level_id)
     current_level = level_id
@@ -45,6 +43,7 @@ function loadLevel(level_id)
     sign.y = SPAWN_HEIGHT - sign.height
     sign.isReading = false
     sign.showPrompt = false
+    floating_texts = {} -- Clear damage numbers on reset
 
     player.load()
 
@@ -61,6 +60,20 @@ function love.load()
     regularFont = love.graphics.newFont("Fonts/QueensidesMedium.ttf", 20)
     love.graphics.setFont(regularFont)
     love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
+    
+    -- The Vignette Shader! 
+    -- It draws a black ring that fades smoothly into the center.
+    vignetteShader = love.graphics.newShader[[
+        extern number intensity;
+        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+            vec2 center = vec2(0.5, 0.5);
+            vec2 uv = screen_coords.xy / love_ScreenSize.xy;
+            float dist = distance(uv, center);
+            // 0.4 starts the darkness halfway out, 1.0 reaches pure black at corners
+            float alpha = smoothstep(0.4, 1.0, dist) * intensity;
+            return vec4(0.0, 0.0, 0.0, alpha);
+        }
+    ]]
 end
 
 function love.keypressed(key)
@@ -79,27 +92,17 @@ function love.mousepressed(x, y, button, istouch, presses)
         local cx = love.graphics.getWidth() / 2 - 100 
         
         if gameState == "menu" then
-            if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then
-                gameState = "level_select"
-            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then
-                gameState = "settings"
-            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then
-                love.event.quit()
-            end
+            if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then gameState = "level_select"
+            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then gameState = "settings"
+            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then love.event.quit() end
             
         elseif gameState == "level_select" then
-            if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then
-                loadLevel(1)
-            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then
-                loadLevel(2)
-            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then
-                gameState = "menu" 
-            end
+            if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then loadLevel(1)
+            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
+            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
             
         elseif gameState == "settings" then
-            if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then
-                gameState = "menu" 
-            end
+            if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
         end
     end
 end
@@ -124,8 +127,51 @@ function love.update(dt)
             sign.isReading = false 
         end
 
+        -- NEW: Update floating damage numbers
+        for i = #floating_texts, 1, -1 do
+            local txt = floating_texts[i]
+            txt.y = txt.y - (30 * dt) -- Float upwards
+            txt.timer = txt.timer - dt
+            if txt.timer <= 0 then
+                table.remove(floating_texts, i)
+            end
+        end
+
         for index, enemy in ipairs(active_enemies) do
             enemy:update(dt, player.x, player.y, player.height)
+            
+            -- The Collision and Damage Event
+            if checkCollision(player.x, player.y, player.width, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
+                if player.invincibility <= 0 then
+                    -- 1. Deal Damage & Give Invincibility
+                    local damage = 25
+                    player.hp = player.hp - damage
+                    if player.hp < 0 then player.hp = 0 end 
+                    player.invincibility = 1.5
+                    
+                    -- Reset the regen cooldown to 2 seconds!
+                    player.regen_delay_timer = 2.0 
+                    
+                    print("DAMAGE TAKEN! Current HP: " .. math.floor(player.hp) .. "/" .. player.max_hp)
+                    
+                    -- 2. Trigger Slowdowns
+                    player.speed_mod = 0.8
+                    player.slow_timer = 0.3
+                    
+                    enemy.speed_mod = 0.2
+                    enemy.slow_timer = 0.6
+                    
+                    -- 3. Spawn Floating Text
+                    if DEBUG_DAMAGE_NUMBERS then
+                        table.insert(floating_texts, {
+                            text = "-" .. damage,
+                            x = enemy.x + (enemy.width/2),
+                            y = enemy.y - 20,
+                            timer = 1.0
+                        })
+                    end
+                end
+            end
         end
     end
 end
@@ -137,7 +183,6 @@ function love.draw()
         love.graphics.printf("THE KNIGHT'S SKY", 0, 100, love.graphics.getWidth(), "center")
         
         local cx = love.graphics.getWidth() / 2 - 100
-        -- Notice we call ui.drawButton instead of just drawButton now!
         ui.drawButton("Play", cx, 200, 200, 50)
         ui.drawButton("Settings", cx, 270, 200, 50)
         ui.drawButton("Quit", cx, 340, 200, 50)
@@ -154,14 +199,15 @@ function love.draw()
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.printf("SETTINGS\n(Coming Soon)", 0, 100, love.graphics.getWidth(), "center")
-        
         local cx = love.graphics.getWidth() / 2 - 100
         ui.drawButton("Back", cx, 340, 200, 50)
         
     elseif gameState == "playing" then
+        -- 1. WORLD SPACE
         love.graphics.push() 
         love.graphics.translate(-math.floor(camera_x), 0) 
 
+        -- Draw Environment
         local currentColor = level_data[current_level].floor_color
         love.graphics.setColor(currentColor)
         love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
@@ -169,18 +215,45 @@ function love.draw()
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
 
-        if sign.showPrompt and not sign.isReading then
-            love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 30)
-        end
-
+        -- Draw Entities
         for index, enemy in ipairs(active_enemies) do
             enemy:draw()
         end
         
         player.draw()
 
+        -- ==========================================
+        -- IN-GAME WORLD UI (Always drawn last so it stays on top!)
+        -- ==========================================
+        
+        -- Draw floating damage numbers
+        love.graphics.setFont(regularFont)
+        for _, txt in ipairs(floating_texts) do
+            -- Fade text out as the timer goes down
+            love.graphics.setColor(1, 0, 0, txt.timer) 
+            love.graphics.print(txt.text, txt.x, txt.y)
+        end
+
+        -- Draw interaction prompts
+        if sign.showPrompt and not sign.isReading then
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.setFont(regularFont)
+            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 30)
+        end
+
         love.graphics.pop() 
+        
+        -- 2. SCREEN UI SPACE (Vignette, Menus, Text Boxes)
+        
+        local missing_health_percent = 1.0 - (player.hp / player.max_hp)
+        if missing_health_percent > 0 then
+            love.graphics.setShader(vignetteShader)
+            vignetteShader:send("intensity", missing_health_percent * 7.5) 
+            
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.setShader() 
+        end
         
         love.graphics.setColor(1, 1, 1, 0.7)
         love.graphics.print("Press ESC to return to menu", 10, 10)

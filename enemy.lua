@@ -6,23 +6,23 @@ local enemyTypes = {
     ["scout"] = {
         spritePrefix = 'Sprites/Boo/Boo',        frames = 1,
         animSpeed = 1.0,
-        scale = 0.08,
-        acceleration = 600,
+        scale = 0.06,
+        acceleration = 300,
         friction = 100,
         max_speed = 180,
         aggro_range = 650,
-        hoverOffset = 300
+        hoverOffset = 200
     },
     ["brute"] = {
         spritePrefix = 'Sprites/Boo/Boo', -- You can change this to 'BruteFrame' when you have art!
         frames = 1,
         animSpeed = 1.5,    -- Slower animation
-        scale = 0.16,       -- Twice as big!
-        acceleration = 300, -- Sluggish to start
+        scale = 0.12,       -- Twice as big!
+        acceleration = 200, -- Sluggish to start
         friction = 150,     -- Slides further like on ice
         max_speed = 80,     -- Slow top speed
         aggro_range = 450,  -- Player has to get closer
-        hoverOffset = 400    -- Hovers lower to the ground
+        hoverOffset = 250    -- Hovers lower to the ground
     }
 }
 
@@ -50,6 +50,11 @@ function EnemyFactory.new(type_name, start_x)
     e.timer = 0
     e.wobble_speed = 5       
     e.wobble_amplitude = 15  
+
+    e.speed_mod = 1.0
+    e.slow_timer = 0
+    
+    e.animation = newAnimationFromFiles(template.spritePrefix, template.frames, template.animSpeed)
     
     -- Initialize Animation
     e.animation = newAnimationFromFiles(template.spritePrefix, template.frames, template.animSpeed)
@@ -102,19 +107,20 @@ function EnemyFactory.new(type_name, start_x)
             -- If out of range, the target_y stays as self.hover_y
         end
         
-        -- Clamp only the X velocity now
+        -- Near the bottom of e:update inside enemy.lua
         if self.x_vel > self.max_speed then self.x_vel = self.max_speed end
         if self.x_vel < -self.max_speed then self.x_vel = -self.max_speed end
 
-        -- Apply X velocity
-        self.x = self.x + (self.x_vel * dt)
-        
-        -- NEW: THE LERP! 
-        -- This smoothly slides the base_y 5% of the way to the target_y every frame.
-        -- Change the '5' to a higher number to make them swoop faster!
-        self.base_y = self.base_y + ((target_y - self.base_y) * 2 * dt)
-        
-        -- Apply the sine wave wobble to the visual position
+        -- Handle enemy slowdown timer
+        if self.slow_timer > 0 then
+            self.slow_timer = self.slow_timer - dt
+        else
+            self.speed_mod = 1.0
+        end
+
+        -- Apply the speed modifier to their velocity!
+        self.x = self.x + (self.x_vel * self.speed_mod * dt)
+        self.base_y = self.base_y + ((target_y - self.base_y) * 5 * dt)
         self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
     end
 

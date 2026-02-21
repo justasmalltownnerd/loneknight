@@ -11,9 +11,9 @@ function player.load()
     player.facing = 1 
 
     -- NEW: Load all your different animations!
-    player.anim_walk = newAnimationFromFiles('Sprites/PlayerWalk/PlayerFrame', 6, 0.5) 
-    player.anim_attack = newAnimationFromFiles('Sprites/PlayerAttack/goku', 1, 0.3) 
-    player.anim_block = newAnimationFromFiles('Sprites/PlayerBlock/Boo', 1, 0.2) 
+    player.anim_walk = newAnimationFromFiles('Sprites/Player/PlayerWalk/PlayerFrame', 6, 0.5) 
+    player.anim_attack = newAnimationFromFiles('Sprites/Player/PlayerAttack/goku', 1, 0.3) 
+    player.anim_block = newAnimationFromFiles('Sprites/Player/PlayerBlock/Boo', 1, 0.2) 
     
     -- Set the active animation
     player.animation = player.anim_walk

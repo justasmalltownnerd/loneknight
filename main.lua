@@ -177,17 +177,29 @@ function love.update(dt)
         for index, enemy in ipairs(active_enemies) do
             enemy:update(dt, player.x, player.y, player.height)
             
+            -- ==========================================
+            -- FIXED: PROJECT THE ENEMY HITBOX
+            -- ==========================================
+            local e_hitbox_x = enemy.x
+            -- Based on your code, facing == 1 means the enemy is facing LEFT
+            if enemy.facing == 1 then
+                e_hitbox_x = enemy.x - enemy.attack_range
+            end
+            -- The danger zone is their body width PLUS their reach
+            local e_hitbox_w = enemy.width + enemy.attack_range
+
             -- The Collision and Damage Event
-            if checkCollision(player.x, player.y, player.width, player.height, enemy.x, enemy.y, enemy.width, enemy.height) then
+            -- Notice we use e_hitbox_x and e_hitbox_w here instead of enemy.x and enemy.width!
+            if enemy.isAttacking and checkCollision(player.x, player.y, player.width, player.height, e_hitbox_x, enemy.y, e_hitbox_w, enemy.height) then
                 if player.invincibility <= 0 then
                     -- Base damage and slow duration
                     local damage = 25
                     local incoming_slow = 0.3
                     
-                    -- NEW: Block Damage Reduction!
+                    -- Block Damage Reduction!
                     if player.isBlocking then
-                        damage = damage * 0.5      -- 50% damage reduction
-                        incoming_slow = 0.1        -- Less slowdown penalty
+                        damage = damage * 0.5      
+                        incoming_slow = 0.1        
                     end
                     
                     player.hp = player.hp - damage
@@ -204,7 +216,7 @@ function love.update(dt)
                     if DEBUG_DAMAGE_NUMBERS then
                         table.insert(floating_texts, {
                             text = "-" .. damage,
-                            x = player.x + (player.width/2), -- Spawn it over the player!
+                            x = player.x + (player.width/2), 
                             y = player.y - 20,
                             timer = 1.0
                         })
@@ -212,7 +224,7 @@ function love.update(dt)
                 end
             end
         end
-
+        
         for i = #active_enemies, 1, -1 do
             if active_enemies[i].hp <= 0 then
                 table.remove(active_enemies, i)

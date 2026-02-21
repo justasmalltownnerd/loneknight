@@ -1,3 +1,4 @@
+-- load tiles: goes in love.load()
 function tileLoad()
 	-- REPLACE WITH ACTUAL GAME TILES
 	tile = {}
@@ -20,6 +21,7 @@ function tileLoad()
 	tile_h = 100
 end
 	
+-- draw map: goes in love.draw()
 function draw_map()
 	offset_x = map_x % tile_w
 	offset_y = map_y % tile_h
@@ -40,6 +42,7 @@ function draw_map()
 	end
 end
 
+-- updates the tile position based on keyboard input: goes in love.update()
 function updateTile( dt )
 	local speed = 300 * dt
 	-- get input

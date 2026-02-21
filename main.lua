@@ -30,13 +30,19 @@ function love.update(dt)
 
     -- Player Movement
     if love.keyboard.isDown('d') or love.keyboard.isDown('right') then
-        player.x = player.x + (player.speed * dt)
+        -- FIXED: We now get the width from the first animation frame and multiply by your scale!
+        if player.x < (love.graphics.getWidth() - (player.animation.frames[1]:getWidth() * player_scale)) then
+            player.x = player.x + (player.speed * dt)
+        end
         player.isMoving = true
-        player.facing = 1 -- NEW: Tell the engine we are facing right
+        player.facing = 1 
     elseif love.keyboard.isDown('a') or love.keyboard.isDown('left') then
-        player.x = player.x - (player.speed * dt)
+        -- Left wall boundary check
+        if player.x > 0 then 
+            player.x = player.x - (player.speed * dt)
+        end
         player.isMoving = true
-        player.facing = -1 -- NEW: Tell the engine we are facing left
+        player.facing = -1 
     end
 
     if player.isMoving then

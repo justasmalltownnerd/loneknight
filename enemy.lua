@@ -9,8 +9,8 @@ local enemyTypes = {
         attackPrefix = 'Sprites/Forest Sprite/ForestSpriteAttack/FSAttack', attackFrames = 6, attackSpeed = 0.4,
         
         scale = 0.15,
-        acceleration = 600, friction = 400, max_speed = 180,
-        aggro_range = 350, hoverOffset = 150, max_hp = 75,
+        acceleration = 300, friction = 400, max_speed = 180,
+        aggro_range = 350, hoverOffset = 250, max_hp = 75,
 
         attack_range = 70,   -- How close they need to be to swing
         attack_cooldown = 1.5 -- Seconds between attacks
@@ -20,9 +20,9 @@ local enemyTypes = {
         walkPrefix = 'Sprites/Boo/Boo', walkFrames = 1, walkSpeed = 0.8,
         attackPrefix = 'Sprites/Boo/Boo', attackFrames = 1, attackSpeed = 0.7,
         
-        scale = 0.30,
-        acceleration = 300, friction = 200, max_speed = 80,
-        aggro_range = 250, hoverOffset = 80, max_hp = 250,
+        scale = 0.10,
+        acceleration = 250, friction = 200, max_speed = 80,
+        aggro_range = 250, hoverOffset = 250, max_hp = 250,
         
         attack_range = 100,
         attack_cooldown = 2.0
@@ -157,7 +157,7 @@ function EnemyFactory.new(type_name, start_x)
         if self.x_vel < -self.max_speed then self.x_vel = -self.max_speed end
 
         self.x = self.x + (self.x_vel * self.speed_mod * dt)
-        self.base_y = self.base_y + ((target_y - self.base_y) * 5 * dt)
+        self.base_y = self.base_y + ((target_y - self.base_y) * 2 * dt)
         self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
     end
 

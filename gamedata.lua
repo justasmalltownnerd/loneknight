@@ -6,7 +6,8 @@ data.levels = {
     [1] = {
         floor_color = {0, 0, 1, 1}, -- Blue
         enemies = {
-            {type = "scout", x = 1500},
+            {type = "Forest Sprite", x = 2600},
+            {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2200}
         }
     },
@@ -14,7 +15,7 @@ data.levels = {
         floor_color = {0, 0.5, 0, 1}, -- Green
         enemies = {
             {type = "brute", x = 1000},
-            {type = "scout", x = 1500},
+            {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         }
     }

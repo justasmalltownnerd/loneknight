@@ -2,7 +2,7 @@
 local player = {}
 
 function player.load()
-    player.scale = 0.15 
+    player.scale = 0.30 
     
     player.walk_speed = 200
     player.sprint_speed = 350
@@ -10,13 +10,14 @@ function player.load()
     
     player.facing = 1 
 
-    -- NEW: Load all your different animations!
-    player.anim_walk = newAnimationFromFiles('Sprites/Player/PlayerWalk/PlayerFrame', 6, 0.5) 
+    -- Load all your different animations!
+    player.anim_idle = newAnimationFromFiles('Sprites/Player/PlayerIdle/PlayerWalk', 1, 0.6)
+    player.anim_walk = newAnimationFromFiles('Sprites/Player/PlayerWalk/PlayerWalk', 6, 0.5) 
     player.anim_attack = newAnimationFromFiles('Sprites/Player/PlayerAttack/goku', 1, 0.3) 
-    player.anim_block = newAnimationFromFiles('Sprites/Player/PlayerBlock/Boo', 1, 0.2) 
+    player.anim_block = newAnimationFromFiles('Sprites/Player/PlayerBlock/PlayerBlock', 2, 0.2) 
     
-    -- Set the active animation
-    player.animation = player.anim_walk
+    -- Set the active animation to idle by default
+    player.animation = player.anim_idle
     
     player.walk_anim_duration = 0.5
     player.sprint_anim_duration = 0.25
@@ -25,7 +26,7 @@ function player.load()
     player.height = player.animation.frames[1]:getHeight() * player.scale
 
     player.x = 100
-    player.y = SPAWN_HEIGHT - player.height
+    player.y = SPAWN_HEIGHT - player.height + (player.height / 9)
     player.ground = player.y     
     player.y_velocity = 0        
     player.jump_height = -600    
@@ -128,7 +129,10 @@ function player.update(dt)
         player.y_velocity = 0     
     end
 
-    -- NEW: Animation State Machine!
+    -- Animation State Machine!
+    if not player.isBlocking then
+        player.anim_block.currentTime = 0
+    end
     if player.isAttacking then
         player.animation = player.anim_attack
         player.animation.currentTime = player.animation.currentTime + dt
@@ -140,7 +144,6 @@ function player.update(dt)
     elseif player.isBlocking then
         player.animation = player.anim_block
         player.animation.currentTime = player.animation.currentTime + dt
-        -- Freeze on the final frame of the block animation
         if player.animation.currentTime >= player.animation.duration then
             player.animation.currentTime = player.animation.duration - 0.001
         end
@@ -150,9 +153,17 @@ function player.update(dt)
         while player.animation.currentTime >= player.animation.duration do
             player.animation.currentTime = player.animation.currentTime - player.animation.duration
         end
+        -- Reset idle animation so it starts fresh next time we stop
+        player.anim_idle.currentTime = 0 
     else
-        player.animation = player.anim_walk
-        player.animation.currentTime = 0
+        -- NEW: Idle Animation Logic!
+        player.animation = player.anim_idle
+        player.animation.currentTime = player.animation.currentTime + dt
+        while player.animation.currentTime >= player.animation.duration do
+            player.animation.currentTime = player.animation.currentTime - player.animation.duration
+        end
+        -- Reset walk animation so it starts from frame 1 next time we move
+        player.anim_walk.currentTime = 0
     end
 end
 

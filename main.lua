@@ -224,7 +224,7 @@ function love.update(dt)
                 end
             end
         end
-        
+
         for i = #active_enemies, 1, -1 do
             if active_enemies[i].hp <= 0 then
                 table.remove(active_enemies, i)
@@ -295,7 +295,7 @@ function love.draw()
         if sign.showPrompt and not sign.isReading then
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.setFont(regularFont)
-            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 30)
+            love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 100)
         end
 
         love.graphics.pop() 

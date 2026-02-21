@@ -16,23 +16,29 @@ function love.load()
 	platform.x = 0                               -- This starts drawing the platform at the left edge of the game window.
 	platform.y = platform.height / 2             -- This starts drawing the platform at the very middle of the game window
 
-    -- This is the coordinates where the player character will be rendered.
-	player.x = love.graphics.getWidth() / 2   -- This sets the player at the middle of the screen based on the width of the game window. 
-	player.y = love.graphics.getHeight() / 2  -- This sets the player at the middle of the screen based on the height of the game window. 
-
     -- This calls the file named "goku.png" and puts it in the variable called player.img.
 	player.img = love.graphics.newImage('Sprites/goku.png')
+    player_scale = 0.04
+
+    -- This is the coordinates where the player character will be rendered.
+	player.x = love.graphics.getWidth() / 2   -- This sets the player at the middle of the screen based on the width of the game window. 
+	player.y = love.graphics.getHeight() / 2 - player.img:getHeight() * player_scale -- This sets the player at the middle of the screen based on the height of the game window. 
+
 end
 
--- Increase the size of the rectangle every frame.
 function love.update(dt)
 
 end
 
 -- Draw a coloured rectangle.
 function love.draw()
+
     love.graphics.setColor(1, 0, 0,1)
     love.graphics.rectangle("fill", x, y, w, h)
+
+    love.graphics.setColor(0, 0, 1,1)
     love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
-	love.graphics.draw(player.img, player.x, player.y, 0, 1, 1, 0, 64)
+
+    love.graphics.setColor(1, 1, 1,1)
+	love.graphics.draw(player.img, player.x, player.y, 0, player_scale, player_scale)
 end

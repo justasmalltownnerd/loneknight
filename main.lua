@@ -14,8 +14,7 @@ require("tileScrollC")
 DEBUG_DAMAGE_NUMBERS = false 
 floating_texts = {}         
 
-gameState = "menu"
-music_volume = 0.5
+gameState = "menu" 
 current_level = 1
 local level_data = gamedata.levels
 
@@ -30,6 +29,11 @@ fade_alpha = 0
 
 current_music = nil -- NEW: Holds our currently playing track!
 
+cutscene = {
+  x = 0, width = 1920, height = 1080,
+  going = false
+}
+
 sign = {
     x = 800, width = 60, height = 80,
     text = gamedata.signText, 
@@ -43,21 +47,8 @@ function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
 end
 
-function playMenuMusic()
-    -- Stop the level music if it's playing
-    if current_music then
-        current_music:stop()
-    end
-    
-    -- Load and play the menu track (Be sure to update this file path!)
-    current_music = love.audio.newSource("Audio/Music/The_Lonely_Night_Menu_Music.mp3", "stream")
-    current_music:setLooping(true)
-    current_music:setVolume(music_volume)
-    current_music:play()
-end
-
 function loadLevel(level_id)
-    current_level = level_id
+current_level = level_id
     local data = level_data[level_id]
 
     -- Stop old music and start the new one
@@ -68,8 +59,7 @@ function loadLevel(level_id)
     -- If this level has a music path defined in gamedata.lua, play it
     if data.musicPath then
         current_music = love.audio.newSource(data.musicPath, "stream")
-        current_music:setLooping(true) 
-        current_music:setVolume(music_volume)
+        current_music:setLooping(true) -- Make sure it repeats!
         current_music:play()
     end
 
@@ -85,6 +75,15 @@ function loadLevel(level_id)
     floating_texts = {}
     transitionState = ""
     fade_alpha = 0
+    
+    -- cutscenes load
+    if level_id == 1 then
+      cutscene.going = true
+    end
+    opening = love.graphics.newImage("Sprites/Cutscenes/Cutscene0.jpg")
+    peaceful = love.graphics.newImage(("Sprites/Cutscenes/Cutscene1.png"))
+    --lie = love.graphics.newImage(("Sprites/Cutscenes/Cutscene2.png"))
+    --truth = love.graphics.newImage(("Sprites/Cutscenes/Cutscene3.png"))
 
     player.load()
     --  WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
@@ -98,7 +97,7 @@ function loadLevel(level_id)
     end
     
     gameState = "playing"
-    sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
+    --sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
     
     noteBack = love.graphics.newImage("Sprites/Puzzles/Solving/NoteBackground.png")
     chest = love.graphics.newImage("Sprites/Puzzles/Solving/NoteChest.png")
@@ -112,7 +111,6 @@ end
 function love.load()
     titleFont = love.graphics.newFont("Fonts/Branda-yolq.ttf", 64)
     regularFont = love.graphics.newFont("Fonts/QueensidesMedium.ttf", 20)
-    bigFont = love.graphics.newFont("Fonts/GalaferaMedium.ttf", 40)
     love.graphics.setFont(regularFont)
     love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
     
@@ -126,8 +124,6 @@ function love.load()
             return vec4(0.0, 0.0, 0.0, alpha);
         }
     ]]
-    
-    playMenuMusic()
 end
 
 function love.keypressed(key)
@@ -135,6 +131,11 @@ function love.keypressed(key)
         if key == "e" and sign.showPrompt then
             sign.isReading = not sign.isReading
         end
+    if gameState == "playing" then
+        if key == "e" and cutscene.going then
+            cutscene.going = not cutscene.going
+        end
+    end
 if key == "escape" then
             gameState = "menu"
             if current_music then current_music:stop() end 
@@ -143,6 +144,9 @@ if key == "escape" then
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
+    if button == 1 and gameState == "playing" and cutscene.going then
+      cutscene.going = not cutscene.going
+    end
     if button == 1 then 
         local cx = love.graphics.getWidth() / 2 - 100 
         
@@ -207,10 +211,10 @@ end
 
 function love.update(dt)
     if gameState == "playing" then
-        updateTileC(dt)
-        updateTileB(dt)
-        updateTile(dt, 400)
-        -- ^ replace 400 with player.speed, add functionality to C and B too
+        updateTileC(dt, player.speed)
+        updateTileB(dt, player.speed)
+        updateTile(dt, player.speed)
+        
         if sign.isReading then return end 
 
         -- ==========================================
@@ -235,6 +239,7 @@ function love.update(dt)
                     if current_music then current_music:stop() end
                 end
             end
+            love.graphics.draw(opening, 0, 0)
             return -- Pause all player/enemy updates while fading out!
             
         elseif transitionState == "in" then
@@ -331,22 +336,6 @@ function love.update(dt)
         -- if press esc then go back to PLAYING state
         -- puzzle hitboxes for puzzle state
     end
-
-    if gameState == "settings" then
-        local cx = love.graphics.getWidth() / 2 - 100
-        
-        -- Get the potentially updated volume from our UI module
-        local new_vol = ui.updateSlider(cx, 200, 200, 20, music_volume)
-        
-        -- If the slider was moved, update the global variable and the actual music
-        if new_vol ~= music_volume then
-            music_volume = new_vol
-            if current_music then 
-                current_music:setVolume(music_volume) 
-            end
-        end
-        return -- Skip the rest of update() while in settings
-    end
 end
 
 function love.draw()
@@ -362,7 +351,6 @@ function love.draw()
         
     elseif gameState == "level_select" then
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.setFont(bigFont)
         love.graphics.printf("SELECT LEVEL", 0, 100, love.graphics.getWidth(), "center")
         
         local cx = love.graphics.getWidth() / 2 - 100
@@ -377,13 +365,10 @@ function love.draw()
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.setFont(bigFont)
-        love.graphics.printf("SETTINGS", 0, 80, love.graphics.getWidth(), "center")
-        
+        love.graphics.printf("SETTINGS\n(Coming Soon)", 0, 100, love.graphics.getWidth(), "center")
         local cx = love.graphics.getWidth() / 2 - 100
-        
-        ui.drawSlider("Music Volume", cx, 200, 200, 20, music_volume)
         ui.drawButton("Back", cx, 340, 200, 50)
+        
         
     elseif gameState == "playing" then
         -- 1. WORLD SPACE
@@ -404,16 +389,13 @@ function love.draw()
         draw_map(level_data[current_level].tileMap)
 
       -- SANITY BAR
-        love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))
-        love.graphics.draw(sanbar, 0, 300, 0, .22)
+        --love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))
+        --love.graphics.draw(sanbar, 0, 300, 0, .22)
       --SIGN THINGS
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
         
-        -- PUZZLE PIECES IN BACKGROUND
-        love.graphics.draw(level_data[current_level].hintA, level_data[current_level].hintAX, level_data[current_level].hintAY)
-        love.graphics.draw(level_data[current_level].hintB, level_data[current_level].hintBX, level_data[current_level].hintBY)
-        love.graphics.draw(level_data[current_level].hintC, level_data[current_level].hintCX, level_data[current_level].hintCY)
+
 
         for index, enemy in ipairs(active_enemies) do
             enemy:draw()
@@ -465,6 +447,15 @@ function love.draw()
             love.graphics.printf(sign.text, margin + 30, margin + 30, box_w - 60, "left")
         end
         
+        if cutscene.going and current_level == 1 then
+          love.graphics.setColor(1, 1, 1, 1)
+          love.graphics.rectangle("fill", 0, 0, 1900, 1080)
+          love.graphics.draw(opening, 0, 0)
+          love.graphics.setColor(0, 0, 0, .75)
+          love.graphics.rectangle("fill", 525, 750, 900, 200)
+          love.graphics.setColor(1, 1, 1, 1)
+          love.graphics.print("Where... where am I?", 570, 770, 0, 2, 2)
+        end
         -- Transition Overlay (Always drawn last!)
         if fade_alpha > 0 then
             love.graphics.setColor(0, 0, 0, fade_alpha)

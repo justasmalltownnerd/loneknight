@@ -28,7 +28,16 @@ data.levels = {
         tileLenC = 500,
         tileMapC = {0, 1, 2, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
         -- background
-        background = love.graphics.newImage("Sprites/Backgrounds/Level1Background.png")
+        background = love.graphics.newImage("Sprites/Backgrounds/Level1Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintAX = 400,
+        hintAY = 600,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintBX = 1500,
+        hintBY = 400,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintCX = 3000,
+        hintCY = 400
     },
     [2] = {
         floor_color = {0, 0.5, 0, 1}, 
@@ -56,7 +65,16 @@ data.levels = {
         tileWidC = 400,
         tileLenC = 500,
         tileMapC = {1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 2, 2, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 2, 1, 0},
-        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintBX = 0,
+        hintBY = 0,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintCX = 0,
+        hintCY = 0
     },
     [3] = {
               floor_color = {0, 0.5, 0, 1}, 
@@ -84,7 +102,16 @@ data.levels = {
         tileWidC = 400,
         tileLenC = 500,
         tileMapC = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        background = love.graphics.newImage("Sprites/Backgrounds/Level3Background.png")
+        background = love.graphics.newImage("Sprites/Backgrounds/Level3Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintBX = 0,
+        hintBY = 420,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintCX = 200,
+        hintCY = 500
     },
   [4] = {
             floor_color = {0, 0.5, 0, 1}, 
@@ -112,7 +139,16 @@ data.levels = {
         tileWidC = 400,
         tileLenC = 500,
         tileMapC = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
-        background = love.graphics.newImage("Sprites/Backgrounds/Level4Background.png")
+        background = love.graphics.newImage("Sprites/Backgrounds/Level4Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintBX = 0,
+        hintBY = 0,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintCX = 0,
+        hintCY = 0
   }
 }
 

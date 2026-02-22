@@ -116,11 +116,11 @@ function love.mousepressed(x, y, button, istouch, presses)
             
         elseif gameState == "level_select" then
             if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then loadLevel(1)
-           -- elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
-        --  elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
-      --  elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 390 then loadLevel(4) 
-      --  elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 390 then loadLevel(5) 
-        elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 390 then gameState = "menu" 
+            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
+          elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
+        elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 460 then loadLevel(4) 
+        elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 530 then loadLevel(5) 
+        elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 600 then gameState = "menu" 
           end
             
         elseif gameState == "settings" then
@@ -179,11 +179,12 @@ function love.update(dt)
                 fade_alpha = 1
                 if level_data[current_level + 1] then
                     loadLevel(current_level + 1)
+      -- SECOND WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
                     tileLoadC(level_data[current_level].tileNameC, level_data[current_level].tileNumC, level_data[current_level].tileWidC, level_data[current_level].tileLenC, level_data[current_level].tileMapC)
                     tileLoadB(level_data[current_level].tileNameB, level_data[current_level].tileNumB, level_data[current_level].tileWidB, level_data[current_level].tileLenB, level_data[current_level].tileMapB)
                       tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                     transitionState = "in" 
-                    -- SECOND WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
+                    
                 else
                     gameState = "menu"
                     transitionState = ""
@@ -279,6 +280,12 @@ function love.update(dt)
                 table.remove(active_enemies, i)
             end
         end
+        
+        -- add puzzle logic / playing state here
+        -- if click on PUZZLE CHEST then see PUZZLE SCREEN
+            -- enter PUZZLE SCREEN state
+        -- if press esc then go back to PLAYING state
+        -- puzzle hitboxes for puzzle state
     end
 end
 
@@ -335,6 +342,11 @@ function love.draw()
       --SIGN THINGS
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
+        
+        -- PUZZLE PIECES IN BACKGROUND
+        love.graphics.draw(level_data[current_level].hintA, level_data[current_level].hintAX, level_data[current_level].hintAY)
+        love.graphics.draw(level_data[current_level].hintB, level_data[current_level].hintBX, level_data[current_level].hintBY)
+        love.graphics.draw(level_data[current_level].hintC, level_data[current_level].hintCX, level_data[current_level].hintCY)
 
         for index, enemy in ipairs(active_enemies) do
             enemy:draw()
@@ -356,6 +368,7 @@ function love.draw()
         end
 
         love.graphics.pop() 
+
         
         -- 2. SCREEN UI SPACE
         local missing_health_percent = 1.0 - (player.hp / player.max_hp)

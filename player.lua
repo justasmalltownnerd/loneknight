@@ -38,7 +38,9 @@ function player.load()
     player.last_dir = 1 
     
     player.max_hp = 100
+    player.max_san = 100
     player.hp = player.max_hp
+    player.san = player.max_san
     player.invincibility = 0
     player.speed_mod = 1.0  
     player.slow_timer = 0

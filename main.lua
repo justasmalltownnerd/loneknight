@@ -69,6 +69,7 @@ function loadLevel(level_id)
     end
     
     gameState = "playing"
+    sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
     
 end
 
@@ -115,8 +116,12 @@ function love.mousepressed(x, y, button, istouch, presses)
             
         elseif gameState == "level_select" then
             if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then loadLevel(1)
-            elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
-            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
+           -- elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
+        --  elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
+      --  elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 390 then loadLevel(4) 
+      --  elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 390 then loadLevel(5) 
+        elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 390 then gameState = "menu" 
+          end
             
         elseif gameState == "settings" then
             if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
@@ -295,7 +300,10 @@ function love.draw()
         local cx = love.graphics.getWidth() / 2 - 100
         ui.drawButton("Level 1", cx, 200, 200, 50)
         ui.drawButton("Level 2", cx, 270, 200, 50)
-        ui.drawButton("Back", cx, 340, 200, 50)
+        ui.drawButton("Level 3", cx, 340, 200, 50)
+        ui.drawButton("Level 4", cx, 410, 200, 50)
+        ui.drawButton("Level 5", cx, 480, 200, 50)
+        ui.drawButton("Back", cx, 550, 200, 50)
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
@@ -321,6 +329,9 @@ function love.draw()
         draw_mapB(level_data[current_level].tileMapB, 0)
         draw_map(level_data[current_level].tileMap, 0)
 
+      -- SANITY BAR
+        love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))
+        love.graphics.draw(sanbar, 0, 300, 0, .22)
       --SIGN THINGS
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)

@@ -7,7 +7,7 @@ data.levels = {
         end_x = 2800, -- The player triggers the end at 2800 pixels!
         enemies = {
             {type = "Forest Sprite", x = 1500},
-            {type = "brute", x = 2200}
+            {type = "Villager", x = 2200}
         },
         -- tile things
         tileName = "cliff",
@@ -43,9 +43,9 @@ data.levels = {
         floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
-            {type = "brute", x = 1000},
+            {type = "Villager", x = 1000},
             {type = "Forest Sprite", x = 1500},
-            {type = "brute", x = 2500}
+            {type = "Villager", x = 2500}
         },
                 -- tile things
         tileName = "forest",
@@ -80,9 +80,9 @@ data.levels = {
               floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
-            {type = "brute", x = 1000},
+            {type = "Villager", x = 1000},
             {type = "Forest Sprite", x = 1500},
-            {type = "brute", x = 2500}
+            {type = "Cliffy", x = 1750}
         },
                 -- tile things
         tileName = "field",

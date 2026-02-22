@@ -13,19 +13,37 @@ local enemyTypes = {
         aggro_range = 350, hoverOffset = 250, max_hp = 75,
 
         attack_range = 70,   -- How close they need to be to swing
-        attack_cooldown = 1.5 -- Seconds between attacks
+        attack_cooldown = 1.5, -- Seconds between attacks
+        
+        isFlying = true
     },
-    ["brute"] = {
-        idlePrefix = 'Sprites/Boo/Boo', idleFrames = 1, idleSpeed = 0.8,
-        walkPrefix = 'Sprites/Boo/Boo', walkFrames = 1, walkSpeed = 0.8,
-        attackPrefix = 'Sprites/Boo/Boo', attackFrames = 1, attackSpeed = 0.7,
+    ["Villager"] = {
+        idlePrefix = 'Sprites/Villager/VillagerIdle/VIdle', idleFrames = 2, idleSpeed = 1.5,
+        walkPrefix = 'Sprites/Villager/VillagerWalk/VWalk', walkFrames = 8, walkSpeed = 0.8,
+        attackPrefix = 'Sprites/Villager/VillagerAttack/VAttack', attackFrames = 8, attackSpeed = 0.4,
         
-        scale = 0.10,
-        acceleration = 250, friction = 200, max_speed = 80,
-        aggro_range = 250, hoverOffset = 250, max_hp = 250,
+        scale = 0.4,
+        acceleration = 150, friction = 200, max_speed = 30,
+        aggro_range = 550, hoverOffset = 250, max_hp = 250,
         
-        attack_range = 100,
-        attack_cooldown = 2.0
+        attack_range = 120,
+        attack_cooldown = 2.0,
+        
+        isFlying = false
+    },
+    ["Cliffy"] = {
+        idlePrefix = 'Sprites/Cliffy/CliffyIdle/CIdle', idleFrames = 2, idleSpeed = 0.4,
+        walkPrefix = 'Sprites/Cliffy/CliffyWalk/CWalk', walkFrames = 9, walkSpeed = 0.6,
+        attackPrefix = 'Sprites/Cliffy/CliffyAttack/CAttack', attackFrames = 9, attackSpeed = 0.4,
+        
+        scale = 0.3,
+        acceleration = 150, friction = 200, max_speed = 100,
+        aggro_range = 550, hoverOffset = 250, max_hp = 250,
+        
+        attack_range = 150,
+        attack_cooldown = 1.5,
+        
+        isFlying = false
     }
 }
 
@@ -41,6 +59,13 @@ function EnemyFactory.new(type_name, start_x)
     e.scale = template.scale
     e.max_hp = template.max_hp or 100
     e.hp = e.max_hp 
+    
+    -- Pull the flying status (default to true if you forget to add it)
+    if template.isFlying ~= nil then
+        e.isFlying = template.isFlying
+    else
+        e.isFlying = true
+    end
 
     e.hover_y = SPAWN_HEIGHT - template.hoverOffset
     e.x = start_x
@@ -58,7 +83,6 @@ function EnemyFactory.new(type_name, start_x)
     e.facing = 1
     e.color = {1, 1, 1, 1}
 
-    -- NEW: Load all animations and set up combat states
     e.animations = {
         idle = newAnimationFromFiles(template.idlePrefix, template.idleFrames, template.idleSpeed),
         walk = newAnimationFromFiles(template.walkPrefix, template.walkFrames, template.walkSpeed),
@@ -96,30 +120,27 @@ function EnemyFactory.new(type_name, start_x)
             self.x_vel = 0 
             self.current_anim = self.animations.attack
             
-            -- FIXED: Remove self.speed_mod from here! 
-            -- This ensures they swing their weapon at normal speed even if their feet are slowed down.
             self.current_anim.currentTime = self.current_anim.currentTime + dt
             
-            -- End attack when animation finishes
             if self.current_anim.currentTime >= self.current_anim.duration then
                 self.isAttacking = false
                 self.attack_timer = self.attack_cooldown_max
                 self.current_anim.currentTime = 0
             end
         else
-            -- ... (Keep the rest of your AI logic the exact same)
             -- AI Logic (Not Attacking)
             if distance <= self.attack_range and self.attack_timer <= 0 then
-                -- Trigger Attack!
                 self.isAttacking = true
                 self.animations.attack.currentTime = 0
-                -- Face the player before swinging
                 if self.x < player_x then self.facing = -1 else self.facing = 1 end
                 
             elseif distance < self.aggro_range then
-                -- Chase Player
                 self.current_anim = self.animations.walk
-                target_y = player_y + (player_height / 2) - (self.height / 2)
+                
+                -- NEW: Only adjust target height if they fly!
+                if self.isFlying then
+                    target_y = player_y + (player_height / 2) - (self.height / 2)
+                end
                 
                 if self.x < player_x then
                     self.x_vel = self.x_vel + (self.acceleration * dt)
@@ -129,7 +150,6 @@ function EnemyFactory.new(type_name, start_x)
                     self.facing = 1
                 end
             else
-                -- Retreat & Idle
                 if self.x_vel > 0 then
                     self.x_vel = self.x_vel - (self.friction * dt)
                     if self.x_vel < 0 then self.x_vel = 0 end
@@ -138,7 +158,6 @@ function EnemyFactory.new(type_name, start_x)
                     if self.x_vel > 0 then self.x_vel = 0 end
                 end
                 
-                -- If they have slowed to a stop, stand idle. Otherwise, keep walking.
                 if math.abs(self.x_vel) < 10 then
                     self.current_anim = self.animations.idle
                 else
@@ -146,7 +165,6 @@ function EnemyFactory.new(type_name, start_x)
                 end
             end
             
-            -- Tick Walk/Idle animations normally
             self.current_anim.currentTime = self.current_anim.currentTime + (dt * self.speed_mod)
             while self.current_anim.currentTime >= self.current_anim.duration do
                 self.current_anim.currentTime = self.current_anim.currentTime - self.current_anim.duration
@@ -157,17 +175,25 @@ function EnemyFactory.new(type_name, start_x)
         if self.x_vel < -self.max_speed then self.x_vel = -self.max_speed end
 
         self.x = self.x + (self.x_vel * self.speed_mod * dt)
-        self.base_y = self.base_y + ((target_y - self.base_y) * 2 * dt)
-        self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
+        
+        -- ==========================================
+        -- NEW: VERTICAL MOVEMENT LOGIC
+        -- ==========================================
+        if self.isFlying then
+            -- Swoop and wobble
+            self.base_y = self.base_y + ((target_y - self.base_y) * 2 * dt)
+            self.y = self.base_y + (math.sin(self.timer * self.wobble_speed) * self.wobble_amplitude)
+        else
+            -- Lock tight to the ground
+            self.y = SPAWN_HEIGHT - self.height
+            self.base_y = self.y -- Keep base_y synced just in case
+        end
     end
 
     function e:draw()
-        -- Use a red tint instead of "10" since LÖVE caps colors at 1.0!
         if self.flash_timer > 0 then
-            -- Tint them red and slightly transparent, exactly like the player!
-            love.graphics.setColor(1, 0.9, 0.7, 0.8) 
+            love.graphics.setColor(0.9, 0.9, 0.9, 0.4) 
         else
-            -- Reset to normal color when the flash timer ends
             love.graphics.setColor(self.color)
         end
         

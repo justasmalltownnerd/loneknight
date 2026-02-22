@@ -106,7 +106,7 @@ function player.update(dt)
 
     -- Adjust speed if attacking or blocking (stop moving entirely)
     local current_speed = player.speed * player.speed_mod
-    if player.isAttacking or player.isBlocking then 
+    if player.isBlocking then 
         current_speed = 0 
     end
 

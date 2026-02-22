@@ -341,9 +341,9 @@ function love.draw()
       --  love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         
         -- LEVEL TILE SELECTOR
-        draw_mapC(level_data[current_level].tileMapC, 0)
-        draw_mapB(level_data[current_level].tileMapB, 0)
-        draw_map(level_data[current_level].tileMap, 0)
+        draw_mapC(level_data[current_level].tileMapC)
+        draw_mapB(level_data[current_level].tileMapB)
+        draw_map(level_data[current_level].tileMap)
 
       -- SANITY BAR
         love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))

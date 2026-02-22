@@ -8,7 +8,7 @@ data.levels = {
         end_x = 2800, -- The player triggers the end at 2800 pixels!
         enemies = {
             {type = "Forest Sprite", x = 1500},
-            {type = "brute", x = 2200}
+            {type = "Forest Sprite", x = 2200}
         },
         -- Tile Things
         tileName = "cliff",
@@ -40,7 +40,7 @@ data.levels = {
         hintCX = 3000,
         hintCY = 400,
         -- Puzzle Box Info
-        puzzleBoxX = 200,
+        puzzleBoxX = 1500,
         puzzleCombo = {1, 2, 3}, -- Square = 1, Triangle = 2, Circle = 3
         noteText = "This world, like many others, is plagued by good and bad.\n Monsters roam this realm, but so do those brave enough to fight against them. \nIf you are reading this, you are one of those brave people. \n\nNow, you may choose to heed my words or ignore them. The latter is understandable, for each stroke of ink dried on the page is a heavy burden on the mind. \n\nNow go and explore more my dear, hero. \n\n\nThere is much of this world to uncover."
     },
@@ -49,9 +49,9 @@ data.levels = {
         floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500,
         enemies = {
-            {type = "brute", x = 1000},
+            {type = "Villager", x = 1000},
             {type = "Forest Sprite", x = 1500},
-            {type = "brute", x = 2500}
+            {type = "Cliffy", x = 2500}
         },
         -- tile things
         tileName = "forest",
@@ -82,7 +82,7 @@ data.levels = {
         hintCX = 0,
         hintCY = 0,
         -- Puzzle Box Info
-        puzzleBoxX = 200,
+        puzzleBoxX = 1200,
         puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
     },
     [3] = {

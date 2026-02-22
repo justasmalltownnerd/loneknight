@@ -112,6 +112,7 @@ end
 function love.load()
     titleFont = love.graphics.newFont("Fonts/Branda-yolq.ttf", 64)
     regularFont = love.graphics.newFont("Fonts/QueensidesMedium.ttf", 20)
+    bigFont = love.graphics.newFont("Fonts/GalaferaMedium.ttf", 40)
     love.graphics.setFont(regularFont)
     love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
     
@@ -361,6 +362,7 @@ function love.draw()
         
     elseif gameState == "level_select" then
         love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(bigFont)
         love.graphics.printf("SELECT LEVEL", 0, 100, love.graphics.getWidth(), "center")
         
         local cx = love.graphics.getWidth() / 2 - 100
@@ -375,7 +377,7 @@ function love.draw()
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.setFont(titleFont)
+        love.graphics.setFont(bigFont)
         love.graphics.printf("SETTINGS", 0, 80, love.graphics.getWidth(), "center")
         
         local cx = love.graphics.getWidth() / 2 - 100

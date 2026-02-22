@@ -48,8 +48,8 @@ function draw_mapB(mapB)
 end
 
 -- updates the tile position based on keyboard input: goes in love.update()
-function updateTileB( dtB)
-	local speedB = 200 * dtB
+function updateTileB( dtB, playerspeedB)
+	local speedB = playerspeedB * .5 * dtB
 	-- get input
 	if love.keyboard.isDown( "a" ) then
 		map_xB = map_xB - speedB

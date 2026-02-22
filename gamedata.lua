@@ -121,7 +121,7 @@ data.levels = {
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         },
-                -- tile things
+        -- tile things
         tileName = "town",
         tileNum = 3,
         tileWid = 400,
@@ -133,7 +133,7 @@ data.levels = {
         tileWidB = 400,
         tileLenB = 500,
         tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        --tile C things
+        -- tile C things
         tileNameC = "town",
         tileNumC = 3,
         tileWidC = 400,

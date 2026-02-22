@@ -47,7 +47,7 @@ function player.load()
     player.regen_rate = 5 
     player.regen_delay_timer = 0 
     
-    -- NEW: Combat States
+    -- Combat States
     player.isMoving = false 
     player.isAttacking = false
     player.isBlocking = false
@@ -75,7 +75,7 @@ function player.update(dt)
         end
     end
 
-    -- NEW: Check for Block Input (Using 'K' or Right-Click as an example)
+    -- Check for Block Input (Using 'K' or Right-Click as an example)
     -- We only allow blocking if they aren't currently swinging their sword!
     player.isBlocking = (love.keyboard.isDown('k') or love.mouse.isDown(2)) and not player.isAttacking
 

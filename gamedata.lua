@@ -44,13 +44,13 @@ data.levels = {
     [2] = {
         musicPath = "Audio/Music/The_Lonely_Night_Forest.mp3",
         floor_color = {0, 0.5, 0, 1}, 
-        end_x = 3500, -- Level 2 is a bit longer!
+        end_x = 3500,
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         },
-                -- tile things
+        -- tile things
         tileName = "forest",
         tileNum = 3,
         tileWid = 400,
@@ -122,7 +122,7 @@ data.levels = {
   [4] = {
         musicPath = "Audio/Music/The_Lonely_Night_Town.mp3",
         floor_color = {0, 0.5, 0, 1}, 
-        end_x = 3500, -- Level 2 is a bit longer!
+        end_x = 3500,
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},

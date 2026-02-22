@@ -14,7 +14,8 @@ require("tileScrollC")
 DEBUG_DAMAGE_NUMBERS = false 
 floating_texts = {}         
 
-gameState = "menu" 
+gameState = "menu"
+music_volume = 0.5
 current_level = 1
 local level_data = gamedata.levels
 
@@ -42,8 +43,21 @@ function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
 end
 
+function playMenuMusic()
+    -- Stop the level music if it's playing
+    if current_music then
+        current_music:stop()
+    end
+    
+    -- Load and play the menu track (Be sure to update this file path!)
+    current_music = love.audio.newSource("Audio/Music/The_Lonely_Night_Menu_Music.mp3", "stream")
+    current_music:setLooping(true)
+    current_music:setVolume(music_volume)
+    current_music:play()
+end
+
 function loadLevel(level_id)
-current_level = level_id
+    current_level = level_id
     local data = level_data[level_id]
 
     -- Stop old music and start the new one
@@ -54,7 +68,8 @@ current_level = level_id
     -- If this level has a music path defined in gamedata.lua, play it
     if data.musicPath then
         current_music = love.audio.newSource(data.musicPath, "stream")
-        current_music:setLooping(true) -- Make sure it repeats!
+        current_music:setLooping(true) 
+        current_music:setVolume(music_volume)
         current_music:play()
     end
 
@@ -110,6 +125,8 @@ function love.load()
             return vec4(0.0, 0.0, 0.0, alpha);
         }
     ]]
+    
+    playMenuMusic()
 end
 
 function love.keypressed(key)
@@ -313,6 +330,22 @@ function love.update(dt)
         -- if press esc then go back to PLAYING state
         -- puzzle hitboxes for puzzle state
     end
+
+    if gameState == "settings" then
+        local cx = love.graphics.getWidth() / 2 - 100
+        
+        -- Get the potentially updated volume from our UI module
+        local new_vol = ui.updateSlider(cx, 200, 200, 20, music_volume)
+        
+        -- If the slider was moved, update the global variable and the actual music
+        if new_vol ~= music_volume then
+            music_volume = new_vol
+            if current_music then 
+                current_music:setVolume(music_volume) 
+            end
+        end
+        return -- Skip the rest of update() while in settings
+    end
 end
 
 function love.draw()
@@ -342,8 +375,12 @@ function love.draw()
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf("SETTINGS\n(Coming Soon)", 0, 100, love.graphics.getWidth(), "center")
+        love.graphics.setFont(titleFont)
+        love.graphics.printf("SETTINGS", 0, 80, love.graphics.getWidth(), "center")
+        
         local cx = love.graphics.getWidth() / 2 - 100
+        
+        ui.drawSlider("Music Volume", cx, 200, 200, 20, music_volume)
         ui.drawButton("Back", cx, 340, 200, 50)
         
     elseif gameState == "playing" then

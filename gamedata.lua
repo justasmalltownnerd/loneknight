@@ -7,7 +7,7 @@ data.levels = {
         end_x = 2800, -- The player triggers the end at 2800 pixels!
         enemies = {
             {type = "Forest Sprite", x = 1500},
-            {type = "Villager", x = 2200}
+            {type = "brute", x = 2200}
         },
         -- tile things
         tileName = "cliff",
@@ -37,15 +37,16 @@ data.levels = {
         hintBY = 400,
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
         hintCX = 3000,
-        hintCY = 400
+        hintCY = 400,
+        puzzleBoxX = 2600
     },
     [2] = {
         floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
-            {type = "Villager", x = 1000},
+            {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
-            {type = "Villager", x = 2500}
+            {type = "brute", x = 2500}
         },
                 -- tile things
         tileName = "forest",
@@ -74,15 +75,16 @@ data.levels = {
         hintBY = 0,
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
-        hintCY = 0
+        hintCY = 0,
+        puzzleBoxX = 3200
     },
     [3] = {
               floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
-            {type = "Villager", x = 1000},
+            {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
-            {type = "Cliffy", x = 1750}
+            {type = "brute", x = 2500}
         },
                 -- tile things
         tileName = "field",
@@ -111,7 +113,8 @@ data.levels = {
         hintBY = 420,
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
         hintCX = 200,
-        hintCY = 500
+        hintCY = 500,
+        puzzleBoxX = 3200
     },
   [4] = {
             floor_color = {0, 0.5, 0, 1}, 
@@ -148,7 +151,122 @@ data.levels = {
         hintBY = 0,
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
-        hintCY = 0
+        hintCY = 0,
+        puzzleBoxX = 3200
+  },
+  [5] = {
+            floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500, -- Level 2 is a bit longer!
+        enemies = {
+            {type = "brute", x = 1000},
+            {type = "Forest Sprite", x = 1500},
+            {type = "brute", x = 2500}
+        },
+                -- tile things
+        tileName = "path",
+        tileNum = 1,
+        tileWid = 0,
+        tileLen = 0,
+        tileMap = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        -- tile B things
+        tileNameB = "path",
+        tileNumB = 1,
+        tileWidB = 0,
+        tileLenB = 0,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "path",
+        tileNumC = 1,
+        tileWidC = 0,
+        tileLenC = 0,
+        tileMapC = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level5Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintBX = 0,
+        hintBY = 0,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintCX = 0,
+        hintCY = 0,
+        puzzleBoxX = 3200
+  },
+    [6] = {
+            floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500, -- Level 2 is a bit longer!
+        enemies = {
+            {type = "brute", x = 1000},
+            {type = "Forest Sprite", x = 1500},
+            {type = "brute", x = 2500}
+        },
+                -- tile things
+        tileName = "church",
+        tileNum = 1,
+        tileWid = 0,
+        tileLen = 0,
+        tileMap = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        -- tile B things
+        tileNameB = "church",
+        tileNumB = 1,
+        tileWidB = 400,
+        tileLenB = 600,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "church",
+        tileNumC = 1,
+        tileWidC = 0,
+        tileLenC = 0,
+        tileMapC = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level6Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintBX = 0,
+        hintBY = 0,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintCX = 0,
+        hintCY = 0,
+        puzzleBoxX = 3200
+  },
+  [7] = {
+            floor_color = {0, 0.5, 0, 1}, 
+        end_x = 1920, -- Level 2 is a bit longer!
+        enemies = {
+            {type = "brute", x = 1000},
+            {type = "Forest Sprite", x = 1500},
+            {type = "brute", x = 2500}
+        },
+                -- tile things
+        tileName = "end",
+        tileNum = 1,
+        tileWid = 0,
+        tileLen = 0,
+        tileMap = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        -- tile B things
+        tileNameB = "end",
+        tileNumB = 1,
+        tileWidB = 0,
+        tileLenB = 0,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "end",
+        tileNumC = 1,
+        tileWidC = 0,
+        tileLenC = 0,
+        tileMapC = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level7Background.png"),
+        hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
+        hintAX = 0,
+        hintAY = 0,
+        hintB = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
+        hintBX = 0,
+        hintBY = 0,
+        hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
+        hintCX = 0,
+        hintCY = 0,
+        puzzleBoxX = 3200
   }
 }
 

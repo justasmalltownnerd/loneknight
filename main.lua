@@ -20,7 +20,7 @@ local level_data = gamedata.levels
 
 platform = {}
 active_enemies = {}
-WORLD_WIDTH = 4000
+WORLD_WIDTH = 4000 -- Expanded world for level transitions!
 camera_x = 0
 
 -- Transition Variables
@@ -71,6 +71,10 @@ function loadLevel(level_id)
     gameState = "playing"
     sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
     
+    noteBack = love.graphics.newImage("Sprites/Puzzles/Solving/NoteBackground.png")
+    chest = love.graphics.newImage("Sprites/Puzzles/Solving/NoteChest.png")
+    solver = love.graphics.newImage("Sprites/Puzzles/Solving/PuzzleSolver.png")
+    
 end
 
 -- ==========================================
@@ -120,7 +124,9 @@ function love.mousepressed(x, y, button, istouch, presses)
           elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
         elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 460 then loadLevel(4) 
         elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 530 then loadLevel(5) 
-        elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 600 then gameState = "menu" 
+      elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 600 then loadLevel(6)
+      elseif x >= cx and x <= cx + 200 and y >= 620 and y <= 670 then loadLevel(7)
+        elseif x >= cx and x <= cx + 200 and y >= 690 and y <= 740 then gameState = "menu"
           end
             
         elseif gameState == "settings" then
@@ -168,6 +174,7 @@ function love.update(dt)
         updateTileC(dt)
         updateTileB(dt)
         updateTile(dt, 400)
+        -- ^ replace 400 with player.speed, add functionality to C and B too
         if sign.isReading then return end 
 
         -- ==========================================
@@ -310,7 +317,9 @@ function love.draw()
         ui.drawButton("Level 3", cx, 340, 200, 50)
         ui.drawButton("Level 4", cx, 410, 200, 50)
         ui.drawButton("Level 5", cx, 480, 200, 50)
-        ui.drawButton("Back", cx, 550, 200, 50)
+        ui.drawButton("Level 6", cx, 550, 200, 50)
+        ui.drawButton("Level 7", cx, 620, 200, 50)
+        ui.drawButton("Back", cx, 690, 200, 50)
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
@@ -332,9 +341,9 @@ function love.draw()
       --  love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         
         -- LEVEL TILE SELECTOR
-        draw_mapC(level_data[current_level].tileMapC)
-        draw_mapB(level_data[current_level].tileMapB)
-        draw_map(level_data[current_level].tileMap)
+        draw_mapC(level_data[current_level].tileMapC, 0)
+        draw_mapB(level_data[current_level].tileMapB, 0)
+        draw_map(level_data[current_level].tileMap, 0)
 
       -- SANITY BAR
         love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))

@@ -3,6 +3,7 @@ local data = {}
 
 data.levels = {
     [1] = {
+        musicPath = "Audio/Music/The_Lonely_Night_Rock_Beach.mp3",
         floor_color = {0, 0, 1, 1}, 
         end_x = 2800, -- The player triggers the end at 2800 pixels!
         enemies = {
@@ -41,6 +42,7 @@ data.levels = {
         puzzleBoxX = 2600
     },
     [2] = {
+        musicPath = "Audio/Music/The_Lonely_Night_Forest.mp3",
         floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
@@ -79,14 +81,15 @@ data.levels = {
         puzzleBoxX = 3200
     },
     [3] = {
-              floor_color = {0, 0.5, 0, 1}, 
+        musicPath = "Audio/Music/The_Lonely_Night_Fields.mp3",
+        floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         },
-                -- tile things
+        -- tile things
         tileName = "field",
         tileNum = 1,
         tileWid = 400,
@@ -98,7 +101,7 @@ data.levels = {
         tileWidB = 400,
         tileLenB = 500,
         tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        --tile C things
+        -- tile C things
         tileNameC = "field",
         tileNumC = 1,
         tileWidC = 400,
@@ -117,7 +120,8 @@ data.levels = {
         puzzleBoxX = 3200
     },
   [4] = {
-            floor_color = {0, 0.5, 0, 1}, 
+        musicPath = "Audio/Music/The_Lonely_Night_Town.mp3",
+        floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
             {type = "brute", x = 1000},
@@ -155,14 +159,15 @@ data.levels = {
         puzzleBoxX = 3200
   },
   [5] = {
-            floor_color = {0, 0.5, 0, 1}, 
+        musicPath = "Audio/Music/The_Lonely_Night_Church_Areas.mp3",
+        floor_color = {0, 0.5, 0, 1}, 
         end_x = 3500, -- Level 2 is a bit longer!
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         },
-                -- tile things
+        -- tile things
         tileName = "path",
         tileNum = 1,
         tileWid = 0,
@@ -193,14 +198,15 @@ data.levels = {
         puzzleBoxX = 3200
   },
     [6] = {
-            floor_color = {0, 0.5, 0, 1}, 
-        end_x = 3500, -- Level 2 is a bit longer!
+        musicPath = "Audio/Music/The_Lonely_Night_Church_Areas.mp3",
+        floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500,
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
         },
-                -- tile things
+        -- tile things
         tileName = "church",
         tileNum = 1,
         tileWid = 0,
@@ -231,8 +237,9 @@ data.levels = {
         puzzleBoxX = 3200
   },
   [7] = {
-            floor_color = {0, 0.5, 0, 1}, 
-        end_x = 1920, -- Level 2 is a bit longer!
+        musicPath = "Audio/Music/The_Lonely_Night_Final_Boss_Fight.mp3",
+        floor_color = {0, 0.5, 0, 1}, 
+        end_x = 1920,
         enemies = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},

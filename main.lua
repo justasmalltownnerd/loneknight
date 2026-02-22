@@ -27,6 +27,8 @@ camera_x = 0
 transitionState = "" 
 fade_alpha = 0
 
+current_music = nil -- NEW: Holds our currently playing track!
+
 sign = {
     x = 800, width = 60, height = 80,
     text = gamedata.signText, 
@@ -41,8 +43,20 @@ function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
 end
 
 function loadLevel(level_id)
-    current_level = level_id
+current_level = level_id
     local data = level_data[level_id]
+
+    -- Stop old music and start the new one
+    if current_music then
+        current_music:stop()
+    end
+    
+    -- If this level has a music path defined in gamedata.lua, play it
+    if data.musicPath then
+        current_music = love.audio.newSource(data.musicPath, "stream")
+        current_music:setLooping(true) -- Make sure it repeats!
+        current_music:play()
+    end
 
     platform.width = WORLD_WIDTH
     platform.height = love.graphics.getHeight()
@@ -103,8 +117,9 @@ function love.keypressed(key)
         if key == "e" and sign.showPrompt then
             sign.isReading = not sign.isReading
         end
-        if key == "escape" then
+if key == "escape" then
             gameState = "menu"
+            if current_music then current_music:stop() end 
         end
     end
 end
@@ -121,13 +136,16 @@ function love.mousepressed(x, y, button, istouch, presses)
         elseif gameState == "level_select" then
             if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then loadLevel(1)
             elseif x >= cx and x <= cx + 200 and y >= 270 and y <= 320 then loadLevel(2)
-          elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
-        elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 460 then loadLevel(4) 
-        elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 530 then loadLevel(5) 
-      elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 600 then loadLevel(6)
-      elseif x >= cx and x <= cx + 200 and y >= 620 and y <= 670 then loadLevel(7)
-        elseif x >= cx and x <= cx + 200 and y >= 690 and y <= 740 then gameState = "menu"
-          end
+            elseif x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then loadLevel(3) 
+            elseif x >= cx and x <= cx + 200 and y >= 410 and y <= 460 then loadLevel(4) 
+            elseif x >= cx and x <= cx + 200 and y >= 480 and y <= 530 then loadLevel(5) 
+            elseif x >= cx and x <= cx + 200 and y >= 550 and y <= 600 then loadLevel(6)
+            elseif x >= cx and x <= cx + 200 and y >= 620 and y <= 670 then loadLevel(7)
+            elseif x >= cx and x <= cx + 200 and y >= 690 and y <= 740 then 
+                gameState = "menu"
+                -- NEW: Stop music if returning from a level (if applicable)
+                if current_music then current_music:stop() end
+        end
             
         elseif gameState == "settings" then
             if x >= cx and x <= cx + 200 and y >= 340 and y <= 390 then gameState = "menu" end
@@ -189,13 +207,14 @@ function love.update(dt)
       -- SECOND WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
                     tileLoadC(level_data[current_level].tileNameC, level_data[current_level].tileNumC, level_data[current_level].tileWidC, level_data[current_level].tileLenC, level_data[current_level].tileMapC)
                     tileLoadB(level_data[current_level].tileNameB, level_data[current_level].tileNumB, level_data[current_level].tileWidB, level_data[current_level].tileLenB, level_data[current_level].tileMapB)
-                      tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
+                    tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                     transitionState = "in" 
                     
                 else
                     gameState = "menu"
                     transitionState = ""
                     fade_alpha = 0
+                    if current_music then current_music:stop() end
                 end
             end
             return -- Pause all player/enemy updates while fading out!

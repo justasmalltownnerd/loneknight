@@ -3,7 +3,8 @@ require("animation")
 local player = require("player")
 local EnemyFactory = require("enemy")
 local gamedata = require("gamedata") 
-local ui = require("ui")             
+local ui = require("ui")
+require("tileScroll")
 
 -- ==========================================
 -- GAME CONFIG & VARIABLES
@@ -55,6 +56,8 @@ function loadLevel(level_id)
     fade_alpha = 0
 
     player.load()
+    --  WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
+    tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
 
     active_enemies = {} 
     for _, enemyInfo in ipairs(data.enemies) do
@@ -62,6 +65,7 @@ function loadLevel(level_id)
     end
     
     gameState = "playing"
+    
 end
 
 -- ==========================================
@@ -152,6 +156,8 @@ end
 
 function love.update(dt)
     if gameState == "playing" then
+        
+        updateTile(dt, 400)
         if sign.isReading then return end 
 
         -- ==========================================
@@ -163,7 +169,10 @@ function love.update(dt)
                 fade_alpha = 1
                 if level_data[current_level + 1] then
                     loadLevel(current_level + 1)
+                      tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                     transitionState = "in" 
+                    -- SECOND WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
+                    tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                 else
                     gameState = "menu"
                     transitionState = ""
@@ -290,13 +299,21 @@ function love.draw()
         
     elseif gameState == "playing" then
         -- 1. WORLD SPACE
+        -- background?
+        love.graphics.draw(level_data[current_level].background, 0, 0, 0, 1)
+        --before
         love.graphics.push() 
         love.graphics.translate(-math.floor(camera_x), 0) 
 
-        local currentColor = level_data[current_level].floor_color
-        love.graphics.setColor(currentColor)
-        love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
+      -- PLACEHOLDER rectangle maker and color selecter
+       -- local currentColor = level_data[current_level].floor_color
+      --  love.graphics.setColor(currentColor)
+      --  love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
+        
+        -- LEVEL TILE SELECTOR
+        draw_map(level_data[current_level].tileMap, 0)
 
+      --SIGN THINGS
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
 

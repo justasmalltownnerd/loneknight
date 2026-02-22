@@ -8,7 +8,14 @@ data.levels = {
         enemies = {
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2200}
-        }
+        },
+        -- tile things
+        tileName = "cliff",
+        tileNum = 4,
+        tileWid = 400,
+        tileLen = 500,
+        tileMap = {1, 0, 0, 2, 3, 4, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 4, 2, 3, 0, 1, 2, 0, 0, 4, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level1Background.png")
     },
     [2] = {
         floor_color = {0, 0.5, 0, 1}, 
@@ -17,8 +24,47 @@ data.levels = {
             {type = "brute", x = 1000},
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2500}
-        }
-    }
+        },
+                -- tile things
+        tileName = "forest",
+        tileNum = 3,
+        tileWid = 400,
+        tileLen = 500,
+        tileMap = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+    },
+    [3] = {
+              floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500, -- Level 2 is a bit longer!
+        enemies = {
+            {type = "brute", x = 1000},
+            {type = "Forest Sprite", x = 1500},
+            {type = "brute", x = 2500}
+        },
+                -- tile things
+        tileName = "field",
+        tileNum = 1,
+        tileWid = 400,
+        tileLen = 500,
+        tileMap = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+    },
+  [4] = {
+            floor_color = {0, 0.5, 0, 1}, 
+        end_x = 3500, -- Level 2 is a bit longer!
+        enemies = {
+            {type = "brute", x = 1000},
+            {type = "Forest Sprite", x = 1500},
+            {type = "brute", x = 2500}
+        },
+                -- tile things
+        tileName = "town",
+        tileNum = 3,
+        tileWid = 400,
+        tileLen = 500,
+        tileMap = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+  }
 }
 
 -- Store your massive story text here!

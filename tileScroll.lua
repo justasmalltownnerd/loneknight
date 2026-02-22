@@ -6,7 +6,7 @@
 function tileLoad(name, num, wid, len, map)
 	tile = {}
 	for i=0,num do -- change 3 to the number of tile images minus 1.
-		tile[i] = love.graphics.newImage( name ..i..".png" )
+		tile[i] = love.graphics.newImage( "Sprites/Tiles/level"..current_level.."tiles/" ..name ..i..".png" )
 	end
 	
 	-- can grab any map

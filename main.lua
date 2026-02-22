@@ -16,6 +16,7 @@ floating_texts = {}
 
 gameState = "menu" 
 current_level = 1
+music_volume = 0.5
 local level_data = gamedata.levels
 
 platform = {}
@@ -34,6 +35,12 @@ puzzlePrompt = false
 current_puzzle_combo = {1, 1, 1} -- This stores what the player currently has entered
 shape_images = {} -- This will hold the 3 unique PNG files
 
+-- Cutscene Variables
+cutscene = {
+  x = 0, width = 1920, height = 1080,
+  going = false
+}
+
 sign = {
     x = 800, width = 60, height = 80,
     text = gamedata.signText, 
@@ -47,8 +54,21 @@ function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
 end
 
+function playMenuMusic()
+    -- Stop the level music if it's playing
+    if current_music then
+        current_music:stop()
+    end
+    
+    -- Load and play the menu track (Be sure to update this file path!)
+    current_music = love.audio.newSource("Audio/Music/The_Lonely_Night_Menu_Music.mp3", "stream")
+    current_music:setLooping(true)
+    current_music:setVolume(music_volume)
+    current_music:play()
+end
+
 function loadLevel(level_id)
-current_level = level_id
+    current_level = level_id
     local data = level_data[level_id]
 
     -- Stop old music and start the new one
@@ -60,6 +80,7 @@ current_level = level_id
     if data.musicPath then
         current_music = love.audio.newSource(data.musicPath, "stream")
         current_music:setLooping(true) -- Make sure it repeats!
+        current_music:setVolume(music_volume)
         current_music:play()
     end
 
@@ -76,7 +97,7 @@ current_level = level_id
     transitionState = ""
     fade_alpha = 0
     
-    -- cutscenes load
+    -- Cutscenes load
     if level_id == 1 then
       cutscene.going = true
     end
@@ -97,12 +118,12 @@ current_level = level_id
     end
     
     gameState = "playing"
-    --sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
+    sanbar = love.graphics.newImage("Sprites/UI/SanityBar.png")
     
+    -- Puzzle loads
     noteBack = love.graphics.newImage("Sprites/Puzzles/Solving/NoteBackground.png")
     chest = love.graphics.newImage("Sprites/Puzzles/Solving/NoteChest.png")
     solver = love.graphics.newImage("Sprites/Puzzles/Solving/PuzzleSolver.png")
-    
 end
 
 -- ==========================================
@@ -111,6 +132,7 @@ end
 function love.load()
     titleFont = love.graphics.newFont("Fonts/Branda-yolq.ttf", 64)
     regularFont = love.graphics.newFont("Fonts/QueensidesMedium.ttf", 20)
+    bigFont = love.graphics.newFont("Fonts/GalaferaMedium.ttf", 40)
     love.graphics.setFont(regularFont)
     love.graphics.setBackgroundColor(0.2, 0.2, 0.2)
     
@@ -135,18 +157,23 @@ end
 function love.keypressed(key)
     if gameState == "playing" then
         if key == "e" then
-            if sign.showPrompt then
+            -- Check Cutscene First
+            if cutscene.going then
+                cutscene.going = false
+            -- Then check Sign reading
+            elseif sign.showPrompt then
                 sign.isReading = not sign.isReading
+            -- Then check Puzzle Box
             elseif puzzlePrompt then
                 gameState = "puzzle"
-                current_puzzle_combo = {1, 1, 1} -- Reset the locks every time they open it
+                current_puzzle_combo = {1, 1, 1}
             end
         end
         if key == "escape" then
             gameState = "menu"
             if current_music then current_music:stop() end 
         end
-    
+        
     -- Exit the puzzle or note screen easily
     elseif gameState == "puzzle" or gameState == "note" then
         if key == "e" or key == "escape" then
@@ -156,11 +183,14 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-    if button == 1 and gameState == "playing" and cutscene.going then
-      cutscene.going = not cutscene.going
-    end
     if button == 1 then 
         local cx = love.graphics.getWidth() / 2 - 100 
+        
+        -- Dismiss Cutscene with click
+        if gameState == "playing" and cutscene.going then
+            cutscene.going = false
+            return -- Stop processing clicks so we don't accidentally attack
+        end
         
         if gameState == "menu" then
             if x >= cx and x <= cx + 200 and y >= 200 and y <= 250 then gameState = "level_select"
@@ -192,13 +222,13 @@ function love.mousepressed(x, y, button, istouch, presses)
             for i = 1, 3 do
                 local colX = midX + ((i - 2) * 350) - 40 
                 
-                -- Up Button clicked (Moved higher up!)
+                -- Up Button clicked 
                 if x >= colX and x <= colX + 80 and y >= lockY - 220 and y <= lockY - 180 then
                     current_puzzle_combo[i] = current_puzzle_combo[i] + 1
                     if current_puzzle_combo[i] > 3 then current_puzzle_combo[i] = 1 end
                 end
                 
-                -- Down Button clicked (Moved further down!)
+                -- Down Button clicked 
                 if x >= colX and x <= colX + 80 and y >= lockY + 140 and y <= lockY + 180 then
                     current_puzzle_combo[i] = current_puzzle_combo[i] - 1
                     if current_puzzle_combo[i] < 1 then current_puzzle_combo[i] = 3 end
@@ -263,11 +293,12 @@ end
 
 function love.update(dt)
     if gameState == "playing" then
-        updateTileC(dt)
-        updateTileB(dt)
-        updateTile(dt,player.speed)
-        -- ^ replace 400 with player.speed, add functionality to C and B too
-        if sign.isReading then return end 
+        updateTileC(dt, player.speed)
+        updateTileB(dt, player.speed)
+        updateTile(dt, player.speed)
+        
+        -- Pause logic if reading or in a cutscene
+        if sign.isReading or cutscene.going then return end 
 
         -- ==========================================
         -- LEVEL TRANSITION LOGIC
@@ -291,7 +322,6 @@ function love.update(dt)
                     if current_music then current_music:stop() end
                 end
             end
-            love.graphics.draw(opening, 0, 0)
             return -- Pause all player/enemy updates while fading out!
             
         elseif transitionState == "in" then
@@ -325,7 +355,7 @@ function love.update(dt)
         end
         
         local box_x = level_data[current_level].puzzleBoxX
-        local p_dist = math.abs((player.x + player.width/2) - (box_x + 50)) -- Assuming chest is ~100px wide
+        local p_dist = math.abs((player.x + player.width/2) - (box_x + 50)) 
         if p_dist < 100 and player.y >= SPAWN_HEIGHT - player.height - 10 then
             puzzlePrompt = true
         else
@@ -390,11 +420,22 @@ function love.update(dt)
             end
         end
         
-        -- add puzzle logic / playing state here
-        -- if click on PUZZLE CHEST then see PUZZLE SCREEN
-            -- enter PUZZLE SCREEN state
-        -- if press esc then go back to PLAYING state
-        -- puzzle hitboxes for puzzle state
+    end
+
+    if gameState == "settings" then
+        local cx = love.graphics.getWidth() / 2 - 100
+        
+        -- Get the potentially updated volume from our UI module
+        local new_vol = ui.updateSlider(cx, 200, 200, 20, music_volume)
+        
+        -- If the slider was moved, update the global variable and the actual music
+        if new_vol ~= music_volume then
+            music_volume = new_vol
+            if current_music then 
+                current_music:setVolume(music_volume) 
+            end
+        end
+        return -- Skip the rest of update() while in settings
     end
 end
 
@@ -411,6 +452,7 @@ function love.draw()
         
     elseif gameState == "level_select" then
         love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(bigFont)
         love.graphics.printf("SELECT LEVEL", 0, 100, love.graphics.getWidth(), "center")
         
         local cx = love.graphics.getWidth() / 2 - 100
@@ -425,10 +467,13 @@ function love.draw()
         
     elseif gameState == "settings" then
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf("SETTINGS\n(Coming Soon)", 0, 100, love.graphics.getWidth(), "center")
-        local cx = love.graphics.getWidth() / 2 - 100
-        ui.drawButton("Back", cx, 340, 200, 50)
+        love.graphics.setFont(bigFont)
+        love.graphics.printf("SETTINGS", 0, 80, love.graphics.getWidth(), "center")
         
+        local cx = love.graphics.getWidth() / 2 - 100
+        
+        ui.drawSlider("Music Volume", cx, 200, 200, 20, music_volume)
+        ui.drawButton("Back", cx, 340, 200, 50)
         
     elseif gameState == "playing" then
         -- 1. WORLD SPACE
@@ -443,20 +488,20 @@ function love.draw()
         draw_mapB(level_data[current_level].tileMapB)
 
       -- SANITY BAR
-        --love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))
-        --love.graphics.draw(sanbar, 0, 300, 0, .22)
+        love.graphics.rectangle("fill", 35, 323+273-(273*(player.san/100)), 110, 273*(player.san/100))
+        love.graphics.draw(sanbar, 0, 300, 0, .22)
       --SIGN THINGS
         love.graphics.setColor(0.8, 0.6, 0.4, 1) 
         love.graphics.rectangle("fill", sign.x, sign.y, sign.width, sign.height)
         
+        -- PUZZLE BOX
         love.graphics.setColor(1, 1, 1, 1)
         local box_x = level_data[current_level].puzzleBoxX
-        local chest_scale = 0.5 -- Change this to make it bigger or smaller!
+        local chest_scale = 0.5 
         
-        -- We multiply the height by the scale so it still sits perfectly on the floor
         love.graphics.draw(chest, box_x, SPAWN_HEIGHT - (chest:getHeight() * chest_scale), 0, chest_scale, chest_scale)
 
-        if puzzlePrompt and not sign.isReading then
+        if puzzlePrompt and not sign.isReading and not cutscene.going then
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.setFont(regularFont)
             love.graphics.print("Press 'E' to inspect", box_x - 20, SPAWN_HEIGHT - (chest:getHeight() * chest_scale) - 30)
@@ -470,7 +515,6 @@ function love.draw()
         
         draw_map(level_data[current_level].tileMap)
 
-
         -- In-Game World UI
         love.graphics.setFont(regularFont)
         for _, txt in ipairs(floating_texts) do
@@ -478,7 +522,7 @@ function love.draw()
             love.graphics.print(txt.text, txt.x, txt.y)
         end
 
-        if sign.showPrompt and not sign.isReading then
+        if sign.showPrompt and not sign.isReading and not cutscene.going then
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.setFont(regularFont)
             love.graphics.print("Press 'E' to read", sign.x - 20, sign.y - 30)
@@ -515,21 +559,24 @@ function love.draw()
             love.graphics.printf(sign.text, margin + 30, margin + 30, box_w - 60, "left")
         end
         
+        -- CUTSCENE UI Overlay
         if cutscene.going and current_level == 1 then
           love.graphics.setColor(1, 1, 1, 1)
-          love.graphics.rectangle("fill", 0, 0, 1900, 1080)
+          love.graphics.rectangle("fill", 0, 0, 1920, 1080)
           love.graphics.draw(opening, 0, 0)
           love.graphics.setColor(0, 0, 0, .75)
           love.graphics.rectangle("fill", 525, 750, 900, 200)
           love.graphics.setColor(1, 1, 1, 1)
           love.graphics.print("Where... where am I?", 570, 770, 0, 2, 2)
         end
+        
         -- Transition Overlay (Always drawn last!)
         if fade_alpha > 0 then
             love.graphics.setColor(0, 0, 0, fade_alpha)
             love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         end
-        -- Draw Puzzle State
+        
+    -- Draw Puzzle State
     elseif gameState == "puzzle" then
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.draw(solver, 0, 0, 0, love.graphics.getWidth() / solver:getWidth(), love.graphics.getHeight() / solver:getHeight())
@@ -543,7 +590,6 @@ function love.draw()
         for i = 1, 3 do
             local colX = midX + ((i - 2) * 350)
             
-            -- Matches the math we just put in mousepressed!
             ui.drawButton("↑", colX - 40, lockY - 220, 80, 40)
             ui.drawButton("↓", colX - 40, lockY + 140, 80, 40)
             
@@ -553,8 +599,6 @@ function love.draw()
             love.graphics.draw(current_shape, colX - (current_shape:getWidth()/2), lockY - (current_shape:getHeight()/2))
         end
                 
-        -- The SUBMIT button is removed so your background art shows through!
-        
         -- Draw EXIT in the bottom right corner
         local exitX = love.graphics.getWidth() - 230
         local exitY = love.graphics.getHeight() - 80
@@ -565,23 +609,18 @@ function love.draw()
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.draw(noteBack, 0, 0, 0, love.graphics.getWidth() / noteBack:getWidth(), love.graphics.getHeight() / noteBack:getHeight())
         
-        love.graphics.setColor(0, 0, 0, 1) -- Black text for ink
+        love.graphics.setColor(0, 0, 0, 1) 
         love.graphics.setFont(regularFont)
         
-        -- Create margins so the text stays inside the paper borders
         local margin = 300
         local text_width = love.graphics.getWidth() - (margin * 2)
         local start_y = 300
         
-        -- Grab the specific text for whichever level we are currently on!
-        -- (The 'or' statement is a fallback just in case you forget to add text to a level)
         local display_text = level_data[current_level].noteText or "The page is blank..."
         
-        -- Print the lore text (it will automatically wrap to the next line based on text_width)
         love.graphics.printf(display_text, margin, start_y, text_width, "left")
         
-        -- Print the exit instructions down at the bottom
-        love.graphics.setColor(0, 0, 0, 0.5) -- Faded black for UI instruction
+        love.graphics.setColor(0, 0, 0, 0.5) 
         love.graphics.printf("(Press E to put the note away)", 0, love.graphics.getHeight() - 80, love.graphics.getWidth(), "center")
     end
 end

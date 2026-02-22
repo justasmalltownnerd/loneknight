@@ -39,7 +39,7 @@ function draw_map(map)
 			then
 				love.graphics.draw(tile[map[x+firstTile_x]], 
 					((x-1)*tile_w) - offset_x - tile_w/2, 
-					1080-tile_h)
+					1080-tile_h+100)
 			end
 		end
 	end
@@ -69,5 +69,3 @@ function updateTile( dt, int )
 	end
  
 end
-
-return tileScroll

@@ -15,6 +15,19 @@ data.levels = {
         tileWid = 400,
         tileLen = 500,
         tileMap = {1, 0, 0, 2, 3, 4, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 4, 2, 3, 0, 1, 2, 0, 0, 4, 2, 0, 3, 0, 1, 0},
+        -- tile B things
+        tileNameB = "cliff",
+        tileNumB = 3,
+        tileWidB = 400,
+        tileLenB = 500,
+        tileMapB = {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+        --tile C things
+        tileNameC = "cliff",
+        tileNumC = 3,
+        tileWidC = 400,
+        tileLenC = 500,
+        tileMapC = {0, 1, 2, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        -- background
         background = love.graphics.newImage("Sprites/Backgrounds/Level1Background.png")
     },
     [2] = {
@@ -31,6 +44,18 @@ data.levels = {
         tileWid = 400,
         tileLen = 500,
         tileMap = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        -- tile B things
+        tileNameB = "forest",
+        tileNumB = 1,
+        tileWidB = 400,
+        tileLenB = 500,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "forest",
+        tileNumC = 2,
+        tileWidC = 400,
+        tileLenC = 500,
+        tileMapC = {1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 2, 2, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 2, 1, 0},
         background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
     },
     [3] = {
@@ -47,7 +72,19 @@ data.levels = {
         tileWid = 400,
         tileLen = 500,
         tileMap = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+        -- tile B things
+        tileNameB = "field",
+        tileNumB = 1,
+        tileWidB = 400,
+        tileLenB = 500,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "field",
+        tileNumC = 1,
+        tileWidC = 400,
+        tileLenC = 500,
+        tileMapC = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level3Background.png")
     },
   [4] = {
             floor_color = {0, 0.5, 0, 1}, 
@@ -63,7 +100,19 @@ data.levels = {
         tileWid = 400,
         tileLen = 500,
         tileMap = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
-        background = love.graphics.newImage("Sprites/Backgrounds/Level2Background.png")
+        -- tile B things
+        tileNameB = "town",
+        tileNumB = 1,
+        tileWidB = 400,
+        tileLenB = 500,
+        tileMapB = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        --tile C things
+        tileNameC = "town",
+        tileNumC = 3,
+        tileWidC = 400,
+        tileLenC = 500,
+        tileMapC = {1, 0, 0, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
+        background = love.graphics.newImage("Sprites/Backgrounds/Level4Background.png")
   }
 }
 

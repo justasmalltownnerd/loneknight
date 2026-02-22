@@ -5,6 +5,8 @@ local EnemyFactory = require("enemy")
 local gamedata = require("gamedata") 
 local ui = require("ui")
 require("tileScroll")
+require("tileScrollB")
+require("tileScrollC")
 
 -- ==========================================
 -- GAME CONFIG & VARIABLES
@@ -57,6 +59,8 @@ function loadLevel(level_id)
 
     player.load()
     --  WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
+    tileLoadC(level_data[current_level].tileNameC, level_data[current_level].tileNumC, level_data[current_level].tileWidC, level_data[current_level].tileLenC, level_data[current_level].tileMapC)
+    tileLoadB(level_data[current_level].tileNameB, level_data[current_level].tileNumB, level_data[current_level].tileWidB, level_data[current_level].tileLenB, level_data[current_level].tileMapB)
     tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
 
     active_enemies = {} 
@@ -156,7 +160,8 @@ end
 
 function love.update(dt)
     if gameState == "playing" then
-        
+        updateTileC(dt)
+        updateTileB(dt)
         updateTile(dt, 400)
         if sign.isReading then return end 
 
@@ -169,10 +174,11 @@ function love.update(dt)
                 fade_alpha = 1
                 if level_data[current_level + 1] then
                     loadLevel(current_level + 1)
+                    tileLoadC(level_data[current_level].tileNameC, level_data[current_level].tileNumC, level_data[current_level].tileWidC, level_data[current_level].tileLenC, level_data[current_level].tileMapC)
+                    tileLoadB(level_data[current_level].tileNameB, level_data[current_level].tileNumB, level_data[current_level].tileWidB, level_data[current_level].tileLenB, level_data[current_level].tileMapB)
                       tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                     transitionState = "in" 
                     -- SECOND WEIRD JANK TILE LOADING SOLUTION (MUST KEEP BOTH TO WORK)
-                    tileLoad(level_data[current_level].tileName, level_data[current_level].tileNum, level_data[current_level].tileWid, level_data[current_level].tileLen, level_data[current_level].tileMap)
                 else
                     gameState = "menu"
                     transitionState = ""
@@ -311,6 +317,8 @@ function love.draw()
       --  love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         
         -- LEVEL TILE SELECTOR
+        draw_mapC(level_data[current_level].tileMapC, 0)
+        draw_mapB(level_data[current_level].tileMapB, 0)
         draw_map(level_data[current_level].tileMap, 0)
 
       --SIGN THINGS

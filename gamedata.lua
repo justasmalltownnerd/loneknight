@@ -10,25 +10,25 @@ data.levels = {
             {type = "Forest Sprite", x = 1500},
             {type = "brute", x = 2200}
         },
-        -- tile things
+        -- Tile Things
         tileName = "cliff",
         tileNum = 4,
         tileWid = 400,
         tileLen = 500,
         tileMap = {1, 0, 0, 2, 3, 4, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 4, 2, 3, 0, 1, 2, 0, 0, 4, 2, 0, 3, 0, 1, 0},
-        -- tile B things
+        -- Tile B Things
         tileNameB = "cliff",
         tileNumB = 3,
         tileWidB = 400,
         tileLenB = 500,
         tileMapB = {0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-        --tile C things
+        -- Tile C Things
         tileNameC = "cliff",
         tileNumC = 3,
         tileWidC = 400,
         tileLenC = 500,
         tileMapC = {0, 1, 2, 2, 3, 0, 1, 0, 2, 1, 1, 0, 3, 2, 0, 1, 0, 3, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 0, 3, 0, 1, 0},
-        -- background
+        -- Background
         background = love.graphics.newImage("Sprites/Backgrounds/Level1Background.png"),
         hintA = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
         hintAX = 400,
@@ -39,7 +39,10 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/circle.png"),
         hintCX = 3000,
         hintCY = 400,
-        puzzleBoxX = 2600
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3}, -- Square = 1, Triangle = 2, Circle = 3
+        noteText = "This world, like many others, is plagued by good and bad.\n Monsters roam this realm, but so do those brave enough to fight against them. \nIf you are reading this, you are one of those brave people. \n\nNow, you may choose to heed my words or ignore them. The latter is understandable, for each stroke of ink dried on the page is a heavy burden on the mind. \n\nNow go and explore more my dear, hero. \n\n\nThere is much of this world to uncover."
     },
     [2] = {
         musicPath = "Audio/Music/The_Lonely_Night_Forest.mp3",
@@ -78,7 +81,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
         hintCY = 0,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
     },
     [3] = {
         musicPath = "Audio/Music/The_Lonely_Night_Fields.mp3",
@@ -117,7 +122,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/triangle.png"),
         hintCX = 200,
         hintCY = 500,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
     },
   [4] = {
         musicPath = "Audio/Music/The_Lonely_Night_Town.mp3",
@@ -156,7 +163,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
         hintCY = 0,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
   },
   [5] = {
         musicPath = "Audio/Music/The_Lonely_Night_Church_Areas.mp3",
@@ -195,7 +204,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
         hintCY = 0,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
   },
     [6] = {
         musicPath = "Audio/Music/The_Lonely_Night_Church_Areas.mp3",
@@ -234,7 +245,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
         hintCY = 0,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
   },
   [7] = {
         musicPath = "Audio/Music/The_Lonely_Night_Final_Boss_Fight.mp3",
@@ -273,7 +286,9 @@ data.levels = {
         hintC = love.graphics.newImage("Sprites/Puzzles/Hints/square.png"),
         hintCX = 0,
         hintCY = 0,
-        puzzleBoxX = 3200
+        -- Puzzle Box Info
+        puzzleBoxX = 200,
+        puzzleCombo = {1, 2, 3} -- Square = 1, Triangle = 2, Circle = 3
   }
 }
 

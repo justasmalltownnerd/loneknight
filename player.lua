@@ -156,7 +156,7 @@ function player.update(dt)
         -- Reset idle animation so it starts fresh next time we stop
         player.anim_idle.currentTime = 0 
     else
-        -- NEW: Idle Animation Logic!
+        -- Idle Animation Logic!
         player.animation = player.anim_idle
         player.animation.currentTime = player.animation.currentTime + dt
         while player.animation.currentTime >= player.animation.duration do
